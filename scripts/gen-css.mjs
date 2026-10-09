@@ -1,0 +1,119 @@
+// Generates src/index.css (brand override block + global conventions).
+// Run: node scripts/gen-css.mjs   — or just edit src/index.css directly.
+import fs from 'node:fs'
+
+const all = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+const rng = (a, b) => all.filter((s) => s >= a && s <= b)
+const rules = []
+const add = (sel, decl) => rules.push(`${sel} { ${decl} }`)
+
+for (const s of rng(50, 900)) add(`.bg-brand-${s}`, `background-color: var(--brand-${s}) !important;`)
+for (const s of rng(500, 800)) add(`.text-brand-${s}`, `color: var(--brand-${s}) !important;`)
+for (const s of rng(200, 600)) add(`.border-brand-${s}`, `border-color: var(--brand-${s}) !important;`)
+for (const s of rng(200, 400)) add(`.ring-brand-${s}`, `--tw-ring-color: var(--brand-${s}) !important;`)
+for (const s of [50, 100, 600, 700]) add(`.hover\\:bg-brand-${s}:hover`, `background-color: var(--brand-${s}) !important;`)
+for (const s of [600, 700, 800]) add(`.hover\\:text-brand-${s}:hover`, `color: var(--brand-${s}) !important;`)
+for (const s of [300, 400, 500]) add(`.hover\\:border-brand-${s}:hover`, `border-color: var(--brand-${s}) !important;`)
+add(
+  `.focus\\:ring-brand-400:focus, .focus-visible\\:ring-brand-400:focus-visible, .focus-within\\:ring-brand-400:focus-within`,
+  `--tw-ring-color: var(--brand-400) !important;`,
+)
+add(`.focus\\:border-brand-400:focus`, `border-color: var(--brand-400) !important;`)
+for (const s of [50, 100, 500, 600])
+  add(
+    `.from-brand-${s}`,
+    `--tw-gradient-from: var(--brand-${s}) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(255 255 255 / 0)) !important;`,
+  )
+for (const s of [100, 600, 700, 800]) add(`.to-brand-${s}`, `--tw-gradient-to: var(--brand-${s}) !important;`)
+
+const D = "html[data-mode='dark']"
+const css = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ *
+ * Brand overrides (runtime theming)
+ *
+ * Tailwind compiles bg-brand-600 etc. at build time; relying on the
+ * compiled output to repaint when --brand-* changes is not reliable
+ * across every build setup. These plain-CSS rules sit AFTER
+ * @tailwind utilities and re-declare the brand utilities we use as
+ * direct var() lookups, so a theme switch repaints immediately.
+ * Only add a utility here if you use it. (Opacity modifiers such as
+ * bg-brand-600/50 are not supported by var() colors.)
+ * ------------------------------------------------------------------ */
+:root {
+  /* Fallback = Classic, so the first paint is never unstyled. */
+  --brand-50: #eff6ff; --brand-100: #dbeafe; --brand-200: #bfdbfe; --brand-300: #93c5fd; --brand-400: #60a5fa;
+  --brand-500: #3b82f6; --brand-600: #2563eb; --brand-700: #1d4ed8; --brand-800: #1e40af; --brand-900: #1e3a8a;
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+${rules.join('\n')}
+
+/* ------------------------------------------------------------------ *
+ * Global conventions
+ * ------------------------------------------------------------------ */
+body { @apply bg-gray-50 font-sans text-gray-900 antialiased; }
+input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color: var(--brand-600); }
+
+.card { @apply bg-white rounded-xl border border-gray-200 shadow-sm; }
+
+.nav-item-active { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white; background-color: var(--brand-500); }
+.nav-item-inactive { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900; }
+
+.stat-indigo { @apply border; background-color: var(--brand-50); color: var(--brand-700); border-color: var(--brand-200); }
+.stat-emerald { @apply border; background-color: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.stat-amber { @apply border; background-color: #fffbeb; color: #b45309; border-color: #fde68a; }
+.stat-rose { @apply border; background-color: #fff1f2; color: #be123c; border-color: #fecdd3; }
+.stat-sky { @apply border; background-color: #f0f9ff; color: #0369a1; border-color: #bae6fd; }
+
+.weight-pill { @apply inline-flex min-w-[1.5rem] items-center justify-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-gray-700; }
+
+/* LoadingDots */
+@keyframes xex-dot-fade { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+.xex-dots { display: inline-flex; align-items: center; gap: 3px; vertical-align: middle; }
+.xex-dots > i { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; opacity: 0.2; animation: xex-dot-fade 0.7s ease-in-out infinite; }
+.xex-dots > i:nth-child(2) { animation-delay: 0.12s; }
+.xex-dots > i:nth-child(3) { animation-delay: 0.24s; }
+
+/* ------------------------------------------------------------------ *
+ * Dark mode (per theme): remap neutral surfaces + soften brand tints.
+ * Driven by <html data-mode="dark">, set by ThemeProvider.
+ * ------------------------------------------------------------------ */
+${D} body { background-color: #0b1020; color: #e5e7eb; }
+${D} .bg-white { background-color: #141a2e !important; }
+${D} .bg-gray-50, ${D} .hover\\:bg-gray-50:hover { background-color: #1a2138 !important; }
+${D} .bg-gray-100, ${D} .hover\\:bg-gray-100:hover, ${D} .weight-pill { background-color: #222a45 !important; }
+${D} .bg-gray-200 { background-color: #323b5c !important; }
+${D} .border-gray-100 { border-color: #1f2740 !important; }
+${D} .border-gray-200 { border-color: #2a3352 !important; }
+${D} .border-gray-300 { border-color: #3a4468 !important; }
+${D} .text-gray-900, ${D} .text-gray-800 { color: #f3f4f6 !important; }
+${D} .text-gray-700, ${D} .text-gray-600, ${D} .weight-pill { color: #cbd2e1 !important; }
+${D} .text-gray-500, ${D} .text-gray-400 { color: #8d97b3 !important; }
+${D} .bg-brand-50, ${D} .hover\\:bg-brand-50:hover { background-color: color-mix(in srgb, var(--brand-500) 16%, #0b1020) !important; }
+${D} .bg-brand-100 { background-color: color-mix(in srgb, var(--brand-500) 26%, #0b1020) !important; }
+${D} .text-brand-600, ${D} .text-brand-700, ${D} .text-brand-800 { color: var(--brand-300) !important; }
+${D} .border-brand-200 { border-color: color-mix(in srgb, var(--brand-500) 40%, #0b1020) !important; }
+${D} .from-brand-50 { --tw-gradient-from: color-mix(in srgb, var(--brand-500) 16%, #0b1020) !important; }
+${D} .from-brand-100 { --tw-gradient-from: color-mix(in srgb, var(--brand-500) 26%, #0b1020) !important; }
+${D} .to-brand-100 { --tw-gradient-to: color-mix(in srgb, var(--brand-500) 30%, #0b1020) !important; }
+${D} .ring-brand-200 { --tw-ring-color: color-mix(in srgb, var(--brand-500) 40%, #0b1020) !important; }
+${D} .stat-indigo { background-color: color-mix(in srgb, var(--brand-500) 16%, #0b1020); color: var(--brand-300); border-color: color-mix(in srgb, var(--brand-500) 40%, #0b1020); }
+${D} .bg-red-50 { background-color: #3a1620 !important; }
+${D} .border-red-200 { border-color: #7f1d1d !important; }
+${D} .text-red-600, ${D} .text-red-700, ${D} .text-red-800 { color: #fca5a5 !important; }
+${D} .bg-emerald-100 { background-color: #0c3a2c !important; } ${D} .text-emerald-700 { color: #6ee7b7 !important; }
+${D} .bg-amber-100 { background-color: #4a3410 !important; } ${D} .text-amber-700 { color: #fcd34d !important; }
+${D} .bg-red-100 { background-color: #4a1a22 !important; }
+${D} .bg-sky-100 { background-color: #0c3350 !important; } ${D} .text-sky-700 { color: #7dd3fc !important; }
+${D} .bg-purple-100 { background-color: #3a1f5a !important; } ${D} .text-purple-700 { color: #d8b4fe !important; }
+${D} .stat-emerald { background-color: #0c2f25; color: #6ee7b7; border-color: #14532d; }
+${D} .stat-amber { background-color: #3a2a0c; color: #fcd34d; border-color: #78350f; }
+${D} .stat-rose { background-color: #3a1420; color: #fda4af; border-color: #881337; }
+${D} .stat-sky { background-color: #0c2a40; color: #7dd3fc; border-color: #075985; }
+${D} input::placeholder, ${D} textarea::placeholder { color: #6b7592; }
+`
+fs.writeFileSync(new URL('../src/index.css', import.meta.url), css)
+console.log('wrote src/index.css')
