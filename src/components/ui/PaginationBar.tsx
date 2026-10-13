@@ -9,6 +9,11 @@ export interface PaginationBarProps {
   onPageChange: (page: number) => void
   pageSizeOptions?: number[]
   onPageSizeChange?: (size: number) => void
+  /**
+   * Where the bar sits relative to its table: 'above' / 'below' draw only the edge facing the
+   * table (so two bars can share one table); the default draws both edges.
+   */
+  placement?: 'above' | 'below'
   /** Extra controls on the right (e.g. a density toggle), divided by a "|". */
   right?: ReactNode
 }
@@ -37,15 +42,21 @@ export function PaginationBar({
   pageSizeOptions,
   onPageSizeChange,
   right,
+  placement,
 }: PaginationBarProps) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1
   const to = Math.min(page * pageSize, total)
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-y border-gray-100 px-4 py-2.5">
+    <div
+      className={clsx(
+        'flex flex-wrap items-center justify-between gap-3 border-gray-100 px-4 py-2.5',
+        placement === 'above' ? 'border-b' : placement === 'below' ? 'border-t' : 'border-y',
+      )}
+    >
       <div>
         {totalPages > 1 && (
-          <nav aria-label="Pagination" className="flex items-center gap-1">
+          <nav aria-label={placement ? `Pagination, ${placement} table` : 'Pagination'} className="flex items-center gap-1">
             <button type="button" className={navBtn} disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
               « Prev
             </button>

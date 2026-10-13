@@ -19,6 +19,7 @@ add(
   `--tw-ring-color: var(--brand-400) !important;`,
 )
 add(`.focus\\:border-brand-400:focus`, `border-color: var(--brand-400) !important;`)
+add(`.group:focus-visible .group-focus-visible\\:ring-brand-400`, `--tw-ring-color: var(--brand-400) !important;`)
 for (const s of [50, 100, 500, 600])
   add(
     `.from-brand-${s}`,
@@ -57,9 +58,14 @@ ${rules.join('\n')}
 body { @apply bg-gray-50 font-sans text-gray-900 antialiased; }
 input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color: var(--brand-600); }
 
+/* Default keyboard-focus ring, themed. :where() keeps specificity at zero, so any control that
+   defines its own ring (focus-visible:ring-*, focus:outline-none) simply overrides this. */
+:where(:focus-visible) { outline: 2px solid var(--brand-500); outline-offset: 2px; }
+:where(html[data-mode='dark'] :focus-visible) { outline-color: var(--brand-300); }
+
 .card { @apply bg-white rounded-xl border border-gray-200 shadow-sm; }
 
-.nav-item-active { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white; background-color: var(--brand-500); }
+.nav-item-active { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white; background-color: var(--brand-600); }
 .nav-item-inactive { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900; }
 
 .stat-indigo { @apply border; background-color: var(--brand-50); color: var(--brand-700); border-color: var(--brand-200); }
@@ -83,6 +89,7 @@ input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color:
  * ------------------------------------------------------------------ */
 ${D} body { background-color: #0b1020; color: #e5e7eb; }
 ${D} .bg-white { background-color: #141a2e !important; }
+${D} .group:focus-visible .group-focus-visible\\:ring-offset-white { --tw-ring-offset-color: #141a2e; }
 ${D} .bg-gray-50, ${D} .hover\\:bg-gray-50:hover { background-color: #1a2138 !important; }
 ${D} .bg-gray-100, ${D} .hover\\:bg-gray-100:hover, ${D} .weight-pill { background-color: #222a45 !important; }
 ${D} .bg-gray-200 { background-color: #323b5c !important; }

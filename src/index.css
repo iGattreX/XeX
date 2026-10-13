@@ -54,6 +54,7 @@
 .hover\:border-brand-500:hover { border-color: var(--brand-500) !important; }
 .focus\:ring-brand-400:focus, .focus-visible\:ring-brand-400:focus-visible, .focus-within\:ring-brand-400:focus-within { --tw-ring-color: var(--brand-400) !important; }
 .focus\:border-brand-400:focus { border-color: var(--brand-400) !important; }
+.group:focus-visible .group-focus-visible\:ring-brand-400 { --tw-ring-color: var(--brand-400) !important; }
 .from-brand-50 { --tw-gradient-from: var(--brand-50) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(255 255 255 / 0)) !important; }
 .from-brand-100 { --tw-gradient-from: var(--brand-100) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(255 255 255 / 0)) !important; }
 .from-brand-500 { --tw-gradient-from: var(--brand-500) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(255 255 255 / 0)) !important; }
@@ -69,9 +70,14 @@
 body { @apply bg-gray-50 font-sans text-gray-900 antialiased; }
 input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color: var(--brand-600); }
 
+/* Default keyboard-focus ring, themed. :where() keeps specificity at zero, so any control that
+   defines its own ring (focus-visible:ring-*, focus:outline-none) simply overrides this. */
+:where(:focus-visible) { outline: 2px solid var(--brand-500); outline-offset: 2px; }
+:where(html[data-mode='dark'] :focus-visible) { outline-color: var(--brand-300); }
+
 .card { @apply bg-white rounded-xl border border-gray-200 shadow-sm; }
 
-.nav-item-active { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white; background-color: var(--brand-500); }
+.nav-item-active { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white; background-color: var(--brand-600); }
 .nav-item-inactive { @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900; }
 
 .stat-indigo { @apply border; background-color: var(--brand-50); color: var(--brand-700); border-color: var(--brand-200); }
@@ -95,6 +101,7 @@ input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color:
  * ------------------------------------------------------------------ */
 html[data-mode='dark'] body { background-color: #0b1020; color: #e5e7eb; }
 html[data-mode='dark'] .bg-white { background-color: #141a2e !important; }
+html[data-mode='dark'] .group:focus-visible .group-focus-visible\:ring-offset-white { --tw-ring-offset-color: #141a2e; }
 html[data-mode='dark'] .bg-gray-50, html[data-mode='dark'] .hover\:bg-gray-50:hover { background-color: #1a2138 !important; }
 html[data-mode='dark'] .bg-gray-100, html[data-mode='dark'] .hover\:bg-gray-100:hover, html[data-mode='dark'] .weight-pill { background-color: #222a45 !important; }
 html[data-mode='dark'] .bg-gray-200 { background-color: #323b5c !important; }

@@ -12,7 +12,6 @@ export default function App() {
   const [pageId, setPageId] = useState(pageFromHash)
   const [menuOpen, setMenuOpen] = useState(false)
   const page = PAGES.find((p) => p.id === pageId) ?? PAGES[0]
-  const [activeSection, setActiveSection] = useState(page.sections[0].id)
   const Page = page.component
 
   useEffect(() => {
@@ -21,26 +20,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  // New page: back to top, first section active.
+  // New page: back to top.
   useEffect(() => {
-    setActiveSection(page.sections[0].id)
     window.scrollTo({ top: 0 })
-  }, [page])
-
-  // Scroll-spy: the last section whose top has passed the header is "active".
-  // Looks elements up at event time, so lazily loaded pages work too.
-  useEffect(() => {
-    const onScroll = () => {
-      let current = page.sections[0].id
-      for (const s of page.sections) {
-        const el = document.getElementById(s.id)
-        if (el && el.getBoundingClientRect().top <= 120) current = s.id
-      }
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = page.sections[page.sections.length - 1].id
-      setActiveSection(current)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
   }, [page])
 
   const goPage = useCallback((id: string) => {
@@ -48,11 +30,6 @@ export default function App() {
     setPageId(id)
     setMenuOpen(false)
   }, [])
-
-  const goSection = (id: string) => {
-    setActiveSection(id)
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   const mainRef = useRef<HTMLElement>(null)
 
@@ -84,7 +61,7 @@ export default function App() {
               <Page />
             </Suspense>
           </main>
-          <PageGuide sections={page.sections} active={activeSection} onSelect={goSection} />
+          <PageGuide sections={page.sections} />
         </div>
       </div>
     </div>

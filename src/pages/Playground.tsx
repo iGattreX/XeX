@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import {
   ArrowDownTrayIcon,
@@ -23,7 +23,8 @@ import {
   Input,
   LoadingDots,
   Modal,
-  PaginationBar,
+  DataTable,
+  type DataTableColumn,
   Select,
   type AvatarSize,
   type BadgeVariant,
@@ -40,7 +41,7 @@ export const SECTIONS: PageSection[] = [
   { id: 'avatars', label: 'Avatars' },
   { id: 'overlays', label: 'Modals' },
   { id: 'feedback', label: 'Feedback & cards' },
-  { id: 'table', label: 'Table & pagination' },
+  { id: 'table', label: 'Data table' },
 ]
 
 const Label = ({ children }: { children: ReactNode }) => (
@@ -54,11 +55,12 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex items-center gap-3 text-sm text-gray-700 focus:outline-none"
+      className="group flex items-center gap-3 text-sm text-gray-700 focus:outline-none"
     >
       <span
         className={clsx(
-          'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-brand-400',
+          // the button is what receives focus, so the ring is driven from it via `group`
+          'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-brand-400 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-white',
           checked ? 'bg-brand-600' : 'bg-gray-300',
         )}
       >
@@ -88,9 +90,39 @@ const PEOPLE = Array.from({ length: 47 }, (_, i) => ({
   id: i + 1,
   name: `${FIRST[i % FIRST.length]} ${LAST[(i * 5 + 3) % LAST.length]}`,
   role: ROLES[i % ROLES.length],
-  status: STATUS[(i * 7) % STATUS.length],
+  status: STATUS[(i * 7 + Math.floor(i / 3)) % STATUS.length],
   seats: ((i * 13) % 9) + 1,
 }))
+
+type Person = (typeof PEOPLE)[number]
+
+const USER_COLUMNS: DataTableColumn<Person>[] = [
+  {
+    id: 'user',
+    header: 'User',
+    accessor: (p) => p.name,
+    cell: (p, { dense }) => (
+      <div className="flex items-center gap-3">
+        <Avatar name={p.name} size={dense ? 'xs' : 'sm'} />
+        <span className="font-medium text-gray-900">{p.name}</span>
+      </div>
+    ),
+  },
+  { id: 'role', header: 'Role', accessor: (p) => p.role, filter: true, filterLabel: 'All roles' },
+  {
+    id: 'status',
+    header: 'Status',
+    accessor: (p) => p.status.label,
+    filter: true,
+    filterLabel: 'All statuses',
+    cell: (p) => (
+      <Badge variant={p.status.variant} dot>
+        {p.status.label}
+      </Badge>
+    ),
+  },
+  { id: 'seats', header: 'Seats', accessor: (p) => p.seats, cell: (p) => <span className="weight-pill">{p.seats}</span> },
+]
 
 export function Playground() {
   const { theme, font } = useTheme()
@@ -115,13 +147,6 @@ export function Playground() {
   const [modalSize, setModalSize] = useState<ModalSize | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleted, setDeleted] = useState(false)
-
-  // Table
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(5)
-  const [dense, setDense] = useState(false)
-  const totalPages = Math.max(1, Math.ceil(PEOPLE.length / pageSize))
-  const rows = useMemo(() => PEOPLE.slice((page - 1) * pageSize, page * pageSize), [page, pageSize])
 
   return (
     <>
@@ -371,55 +396,18 @@ export function Playground() {
         </div>
       </Section>
 
-      <Section id="table" title="Table & PaginationBar" description="Page numbers collapse with …; the right slot hosts a density toggle.">
-        <div className="overflow-hidden rounded-xl border border-gray-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-2.5 font-semibold">User</th>
-                <th className="px-4 py-2.5 font-semibold">Role</th>
-                <th className="px-4 py-2.5 font-semibold">Status</th>
-                <th className="px-4 py-2.5 font-semibold">Seats</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className={clsx('px-4', dense ? 'py-1.5' : 'py-3')}>
-                    <div className="flex items-center gap-3">
-                      <Avatar name={p.name} size={dense ? 'xs' : 'sm'} />
-                      <span className="font-medium text-gray-900">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className={clsx('px-4 text-gray-600', dense ? 'py-1.5' : 'py-3')}>{p.role}</td>
-                  <td className={clsx('px-4', dense ? 'py-1.5' : 'py-3')}>
-                    <Badge variant={p.status.variant} dot>{p.status.label}</Badge>
-                  </td>
-                  <td className={clsx('px-4', dense ? 'py-1.5' : 'py-3')}>
-                    <span className="weight-pill">{p.seats}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <PaginationBar
-            page={page}
-            totalPages={totalPages}
-            total={PEOPLE.length}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            pageSizeOptions={[5, 10, 25]}
-            onPageSizeChange={(n) => {
-              setPageSize(n)
-              setPage(1)
-            }}
-            right={
-              <Button size="xs" variant="ghost" onClick={() => setDense((d) => !d)}>
-                {dense ? 'Comfortable' : 'Compact'}
-              </Button>
-            }
-          />
-        </div>
+      <Section
+        id="table"
+        title="Data table"
+        description="Sorting, search, column filters, pagination (above and below) and a density toggle are built into every DataTable."
+      >
+        <DataTable
+          label="Users"
+          rows={PEOPLE}
+          rowKey={(p) => p.id}
+          searchPlaceholder="Search users…"
+          columns={USER_COLUMNS}
+        />
       </Section>
     </>
   )
