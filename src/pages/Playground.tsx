@@ -8,6 +8,9 @@ import {
   TrashIcon,
   ArrowPathIcon,
   ArrowRightIcon,
+  ClockIcon,
+  Cog6ToothIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import { SHADE_STEPS } from '../theme/themes'
@@ -32,6 +35,7 @@ import {
   Skeleton,
   SkeletonText,
   Spinner,
+  Tabs,
   type DataTableColumn,
   type FetchState,
   Select,
@@ -46,6 +50,7 @@ export const SECTIONS: PageSection[] = [
   { id: 'theme', label: 'Theme' },
   { id: 'buttons', label: 'Buttons' },
   { id: 'badges', label: 'Badges' },
+  { id: 'tabs', label: 'Tabs' },
   { id: 'forms', label: 'Form controls' },
   { id: 'avatars', label: 'Avatars' },
   { id: 'overlays', label: 'Modals' },
@@ -166,6 +171,10 @@ export function Playground() {
   const [agree, setAgree] = useState(false)
   const submitted = name.length > 0 && name.length < 3
 
+  // Tabs
+  const [controlledTab, setControlledTab] = useState('b')
+  const tabPanel = (text: string) => <p className="text-sm text-gray-600">{text}</p>
+
   // Loading & status
   const [progress, setProgress] = useState(0)
   const [running, setRunning] = useState(false)
@@ -277,6 +286,83 @@ export function Playground() {
                 {v}
               </Badge>
             ))}
+          </div>
+        </div>
+      </Section>
+
+      <Section id="tabs" title="Tabs" description="Arrow keys / Home / End move between tabs; only the selected tab is a Tab stop. Disabled tabs are skipped.">
+        <div className="space-y-8">
+          <div>
+            <Label>Underline · icons and badge · one disabled</Label>
+            <Tabs
+              label="Project sections"
+              items={[
+                { id: 'overview', label: 'Overview', icon: <HomeIcon className="h-4 w-4" />, content: tabPanel('Overview panel. The line under the tab slides when the selection changes.') },
+                { id: 'activity', label: 'Activity', icon: <ClockIcon className="h-4 w-4" />, badge: 12, content: tabPanel('Activity panel with a count badge on its tab.') },
+                { id: 'settings', label: 'Settings', icon: <Cog6ToothIcon className="h-4 w-4" />, content: tabPanel('Settings panel.') },
+                { id: 'billing', label: 'Billing', disabled: true, content: tabPanel('Not reachable.') },
+              ]}
+            />
+          </div>
+
+          <div>
+            <Label>Pills · small</Label>
+            <Tabs
+              variant="pills"
+              size="sm"
+              label="Time range"
+              items={[
+                { id: 'day', label: 'Day', content: tabPanel('Showing the last 24 hours.') },
+                { id: 'week', label: 'Week', content: tabPanel('Showing the last 7 days.') },
+                { id: 'month', label: 'Month', badge: 3, content: tabPanel('Showing the last 30 days.') },
+              ]}
+            />
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div>
+              <Label>Manual activation · keep panels mounted</Label>
+              <Tabs
+                activation="manual"
+                keepMounted
+                label="Draft"
+                items={[
+                  { id: 'a', label: 'Title', content: <Input aria-label="Title" placeholder="Type here, switch tab, come back…" /> },
+                  { id: 'b', label: 'Body', content: <Input aria-label="Body" placeholder="Typed text is kept" /> },
+                ]}
+              />
+              <p className="mt-2 text-xs text-gray-500">Arrows move focus only; Enter or Space selects.</p>
+            </div>
+
+            <div>
+              <Label>Controlled · selected: {controlledTab}</Label>
+              <Tabs
+                fullWidth
+                value={controlledTab}
+                onChange={setControlledTab}
+                label="Controlled example"
+                items={[
+                  { id: 'a', label: 'First', content: tabPanel('First panel.') },
+                  { id: 'b', label: 'Second', content: tabPanel('Second panel.') },
+                  { id: 'c', label: 'Third', content: tabPanel('Third panel.') },
+                ]}
+              />
+              <div className="mt-2 flex gap-2">
+                {['a', 'b', 'c'].map((id) => (
+                  <Button key={id} size="xs" variant="secondary" onClick={() => setControlledTab(id)}>
+                    Select {id}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-sm">
+            <Label>Overflow · scrolls instead of wrapping</Label>
+            <Tabs
+              label="Many tabs"
+              items={['Dashboard', 'Reports', 'Customers', 'Invoices', 'Subscriptions', 'Integrations', 'Audit log'].map((t) => ({ id: t, label: t, content: tabPanel(t + ' panel.') }))}
+            />
           </div>
         </div>
       </Section>
