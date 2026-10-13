@@ -83,12 +83,24 @@ input[type='checkbox'], input[type='radio'], input[type='range'] { accent-color:
 .xex-dots > i:nth-child(2) { animation-delay: 0.12s; }
 .xex-dots > i:nth-child(3) { animation-delay: 0.24s; }
 
+/* ProgressBar (indeterminate), ProgressRing track, LoadingOverlay scrim */
+@keyframes xex-indeterminate { 0% { left: -40%; } 100% { left: 100%; } }
+.xex-indeterminate { animation: xex-indeterminate 1.2s ease-in-out infinite; }
+.xex-ring-track { stroke: #e5e7eb; }
+.xex-overlay { background-color: rgb(255 255 255 / 0.65); }
+@media (prefers-reduced-motion: reduce) {
+  .xex-dots > i { animation: none; opacity: 0.6; }
+  .xex-indeterminate { animation: none; left: 0; width: 100%; opacity: 0.5; }
+}
+
 /* ------------------------------------------------------------------ *
  * Dark mode (per theme): remap neutral surfaces + soften brand tints.
  * Driven by <html data-mode="dark">, set by ThemeProvider.
  * ------------------------------------------------------------------ */
 ${D} body { background-color: #0b1020; color: #e5e7eb; }
 ${D} .bg-white { background-color: #141a2e !important; }
+${D} .xex-ring-track { stroke: #2a3352; }
+${D} .xex-overlay { background-color: rgb(20 26 46 / 0.65); }
 ${D} .group:focus-visible .group-focus-visible\\:ring-offset-white { --tw-ring-offset-color: #141a2e; }
 ${D} .bg-gray-50, ${D} .hover\\:bg-gray-50:hover { background-color: #1a2138 !important; }
 ${D} .bg-gray-100, ${D} .hover\\:bg-gray-100:hover, ${D} .weight-pill { background-color: #222a45 !important; }

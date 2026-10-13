@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import clsx from 'clsx'
+import { Spinner } from './Spinner'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
@@ -25,15 +26,6 @@ const sizes: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm rounded-lg gap-1.5',
   md: 'px-4 py-2 text-sm rounded-lg gap-2',
   lg: 'px-5 py-2.5 text-base rounded-xl gap-2.5',
-}
-
-function Spinner() {
-  return (
-    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="opacity-90" />
-    </svg>
-  )
 }
 
 export function Button({
@@ -63,7 +55,7 @@ export function Button({
       )}
       {...rest}
     >
-      {loading ? <Spinner /> : icon}
+      {loading ? <Spinner decorative /> : icon}
       {children}
       {iconRight}
     </button>

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import {
   ArrowDownTrayIcon,
@@ -6,6 +6,7 @@ import {
   PlusIcon,
   Squares2X2Icon,
   TrashIcon,
+  ArrowPathIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
@@ -24,7 +25,15 @@ import {
   LoadingDots,
   Modal,
   DataTable,
+  FetchStatus,
+  LoadingOverlay,
+  ProgressBar,
+  ProgressRing,
+  Skeleton,
+  SkeletonText,
+  Spinner,
   type DataTableColumn,
+  type FetchState,
   Select,
   type AvatarSize,
   type BadgeVariant,
@@ -41,8 +50,22 @@ export const SECTIONS: PageSection[] = [
   { id: 'avatars', label: 'Avatars' },
   { id: 'overlays', label: 'Modals' },
   { id: 'feedback', label: 'Feedback & cards' },
+  { id: 'loading', label: 'Loading & status' },
   { id: 'table', label: 'Data table' },
 ]
+
+/** A named demo cell: what it is called, and the component that renders it. */
+function Tile({ name, component, children }: { name: string; component: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-gray-200 p-4">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
+        <h3 className="text-sm font-semibold text-gray-900">{name}</h3>
+        <code className="font-mono text-[11px] text-gray-400">{component}</code>
+      </div>
+      {children}
+    </div>
+  )
+}
 
 const Label = ({ children }: { children: ReactNode }) => (
   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{children}</p>
@@ -142,6 +165,35 @@ export function Playground() {
   const [volume, setVolume] = useState(40)
   const [agree, setAgree] = useState(false)
   const submitted = name.length > 0 && name.length < 3
+
+  // Loading & status
+  const [progress, setProgress] = useState(0)
+  const [running, setRunning] = useState(false)
+  const [overlayLoading, setOverlayLoading] = useState(true)
+  const [fetchState, setFetchState] = useState<FetchState>('idle')
+  const attempts = useRef(0)
+
+  useEffect(() => {
+    if (!running) return
+    const t = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 100) {
+          setRunning(false)
+          return 100
+        }
+        return Math.min(100, p + 4)
+      })
+    }, 120)
+    return () => clearInterval(t)
+  }, [running])
+
+  const simulateFetch = () => {
+    setFetchState('loading')
+    attempts.current += 1
+    // odd attempts succeed, even attempts fail, so both outcomes can be seen
+    const ok = attempts.current % 2 === 1
+    setTimeout(() => setFetchState(ok ? 'success' : 'error'), 1600)
+  }
 
   // Overlays
   const [modalSize, setModalSize] = useState<ModalSize | null>(null)
@@ -356,7 +408,7 @@ export function Playground() {
         />
       </Section>
 
-      <Section id="feedback" title="Feedback & cards" description="LoadingDots, stat cards, .card, .weight-pill, inline alerts.">
+      <Section id="feedback" title="Feedback & cards" description="Stat cards, .card, .weight-pill, inline alerts.">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {[
             { cls: 'stat-indigo', label: 'Revenue', value: '$48.2k' },
@@ -373,12 +425,6 @@ export function Playground() {
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-6 text-sm text-gray-700">
           <span className="flex items-center gap-2">
-            Fetching <LoadingDots className="text-brand-600" />
-          </span>
-          <span className="flex items-center gap-2">
-            Total: <LoadingDots />
-          </span>
-          <span className="flex items-center gap-2">
             Weights <span className="weight-pill">3</span> <span className="weight-pill">12</span> <span className="weight-pill">100</span>
           </span>
         </div>
@@ -393,6 +439,149 @@ export function Playground() {
         <div className="mt-5 flex items-center gap-3 text-gray-500">
           <Squares2X2Icon className="h-6 w-6" /> <span className="text-xs">outline 24 = neutral</span>
           <CheckCircleIcon className="h-5 w-5 text-brand-600" /> <span className="text-xs">solid 20 = status/emphasis</span>
+        </div>
+      </Section>
+
+      <Section
+        id="loading"
+        title="Loading & status"
+        description="Every way the system shows that something is being fetched, is in progress, or has finished. Each tile is named, with the component that renders it."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <Tile name="Spinner" component="<Spinner />">
+            <div className="flex flex-wrap items-end gap-5 text-brand-600">
+              {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((sz) => (
+                <div key={sz} className="text-center">
+                  <Spinner size={sz} />
+                  <p className="mt-1 text-[11px] text-gray-500">{sz}</p>
+                </div>
+              ))}
+              <Spinner size="lg" className="text-gray-400" />
+              <Spinner size="lg" className="text-emerald-500" />
+            </div>
+          </Tile>
+
+          <Tile name="Loading dots" component="<LoadingDots />">
+            <div className="space-y-2 text-sm text-gray-700">
+              <p className="flex items-center gap-2">
+                Fetching <LoadingDots className="text-brand-600" />
+              </p>
+              <p className="flex items-center gap-2">
+                Total: <LoadingDots />
+              </p>
+              <p className="text-xs text-gray-500">Drop into any cell or value that is still loading.</p>
+            </div>
+          </Tile>
+
+          <Tile name="Button loading state" component="<Button loading />">
+            <div className="flex flex-wrap gap-2">
+              <Button loading>Saving</Button>
+              <Button loading variant="secondary">
+                Syncing
+              </Button>
+              <Button loading variant="outline" size="sm">
+                Exporting
+              </Button>
+            </div>
+          </Tile>
+
+          <Tile name="Progress bar · determinate" component="<ProgressBar value />">
+            <div className="space-y-3">
+              <ProgressBar label="Upload" value={progress} showLabel />
+              <ProgressBar label="Storage" value={72} tone="warning" showLabel size="sm" />
+              <ProgressBar label="Complete" value={100} tone="success" showLabel size="lg" />
+              <Button
+                size="xs"
+                variant="secondary"
+                icon={<ArrowPathIcon className="h-4 w-4" />}
+                onClick={() => {
+                  setProgress(0)
+                  setRunning(true)
+                }}
+                disabled={running}
+              >
+                {running ? 'Uploading…' : 'Run upload'}
+              </Button>
+            </div>
+          </Tile>
+
+          <Tile name="Progress bar · indeterminate" component="<ProgressBar />">
+            <div className="space-y-3">
+              <ProgressBar label="Loading" />
+              <ProgressBar label="Working" tone="success" size="sm" />
+              <p className="text-xs text-gray-500">When the duration is unknown.</p>
+            </div>
+          </Tile>
+
+          <Tile name="Progress ring" component="<ProgressRing />">
+            <div className="flex flex-wrap items-center gap-4">
+              <ProgressRing label="Upload" value={progress} size={56} />
+              <ProgressRing label="Disk" value={72} size={56} tone="warning" />
+              <ProgressRing label="Done" value={100} size={56} tone="success" />
+              <ProgressRing label="Loading" size={40} />
+            </div>
+          </Tile>
+
+          <Tile name="Skeleton · text and avatar" component="<Skeleton /> <SkeletonText />">
+            <div className="flex items-start gap-3" aria-busy="true">
+              <Skeleton shape="circle" className="h-10 w-10 shrink-0" />
+              <div className="flex-1 space-y-3">
+                <Skeleton shape="text" className="h-4 w-1/2" />
+                <SkeletonText lines={3} />
+              </div>
+            </div>
+          </Tile>
+
+          <Tile name="Skeleton · card" component="<Skeleton shape='rect' />">
+            <div className="space-y-3" aria-busy="true">
+              <Skeleton className="h-24 w-full" />
+              <SkeletonText lines={2} />
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </div>
+          </Tile>
+
+          <Tile name="Loading overlay" component="<LoadingOverlay />">
+            <div className="mb-3">
+              <Toggle checked={overlayLoading} onChange={setOverlayLoading} label={overlayLoading ? 'Loading' : 'Loaded'} />
+            </div>
+            <LoadingOverlay loading={overlayLoading} label="Loading users…" className="rounded-lg">
+              <div className="rounded-lg border border-gray-200 p-3">
+                {['Ada Lovelace', 'Grace Hopper', 'Alan Turing'].map((n) => (
+                  <div key={n} className="flex items-center gap-2 py-1.5 text-sm text-gray-700">
+                    <Avatar name={n} size="xs" /> {n}
+                  </div>
+                ))}
+              </div>
+            </LoadingOverlay>
+          </Tile>
+
+          <Tile name="Fetch status" component="<FetchStatus />">
+            <div className="space-y-2">
+              <FetchStatus state={fetchState} onRetry={simulateFetch} messages={{ success: 'Loaded 47 records' }} />
+              <Button size="xs" variant="secondary" onClick={simulateFetch} disabled={fetchState === 'loading'}>
+                Simulate fetch
+              </Button>
+              <p className="text-xs text-gray-500">Idle → loading → success or error (alternates).</p>
+            </div>
+          </Tile>
+
+          <Tile name="All fetch states" component="idle · loading · success · error">
+            <div className="space-y-2">
+              {(['idle', 'loading', 'success', 'error'] as const).map((st) => (
+                <FetchStatus key={st} state={st} onRetry={() => {}} />
+              ))}
+            </div>
+          </Tile>
+
+          <Tile name="Refreshing icon" component="<ArrowPathIcon animate-spin />">
+            <p className="flex items-center gap-2 text-sm text-gray-700">
+              <ArrowPathIcon className="h-5 w-5 animate-spin text-brand-600 motion-reduce:animate-none" aria-hidden="true" />
+              Refreshing…
+            </p>
+          </Tile>
         </div>
       </Section>
 
