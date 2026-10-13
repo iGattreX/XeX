@@ -78,6 +78,11 @@ export function MultiSelect({ options, value, onChange, label, className }: Mult
           id={panelId}
           role="group"
           aria-label={label}
+          // Pressing label text / padding must not shift focus to an ancestor (e.g. <main tabindex=-1>):
+          // the blur handler would read that as tabbing away, close the panel and swallow the click.
+          onMouseDown={(e) => {
+            if (!(e.target instanceof HTMLInputElement)) e.preventDefault()
+          }}
           className="absolute left-0 z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-1 shadow-xl"
         >
           {options.map((o) => (
