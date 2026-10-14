@@ -128,6 +128,7 @@ const USER_COLUMNS: DataTableColumn<Person>[] = [
   {
     id: 'user',
     header: 'User',
+    width: 3,
     accessor: (p) => p.name,
     cell: (p, { dense }) => (
       <div className="flex items-center gap-3">
@@ -136,10 +137,11 @@ const USER_COLUMNS: DataTableColumn<Person>[] = [
       </div>
     ),
   },
-  { id: 'role', header: 'Role', accessor: (p) => p.role, filter: true, filterLabel: 'All roles' },
+  { id: 'role', header: 'Role', width: 2, accessor: (p) => p.role, filter: true, filterLabel: 'All roles' },
   {
     id: 'status',
     header: 'Status',
+    width: 2,
     accessor: (p) => p.status.label,
     filter: true,
     filterLabel: 'All statuses',
@@ -149,7 +151,7 @@ const USER_COLUMNS: DataTableColumn<Person>[] = [
       </Badge>
     ),
   },
-  { id: 'seats', header: 'Seats', accessor: (p) => p.seats, cell: (p) => <span className="weight-pill">{p.seats}</span> },
+  { id: 'seats', header: 'Seats', width: 1, accessor: (p) => p.seats, cell: (p) => <span className="weight-pill">{p.seats}</span> },
 ]
 
 export function Playground() {
