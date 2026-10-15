@@ -1,7 +1,7 @@
 {
   "name": "xex-monorepo",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "XeX design system: packages (@xex/tokens, @xex/tailwind-preset, @xex/ui) and the docs site.",
   "license": "MIT",
   "workspaces": [
