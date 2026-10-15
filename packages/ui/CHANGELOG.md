@@ -1,5 +1,13 @@
 # @xex/ui
 
+## 0.2.1
+
+### Patch Changes
+
+- ce81623: Point the package metadata (repository, homepage, bugs) at the renamed GitHub repository, `iGattreX/XeX`.
+- Updated dependencies [ce81623]
+  - @xex/tokens@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes
