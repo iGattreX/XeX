@@ -84,6 +84,22 @@ Dark mode is a change of CSS variable values (see `packages/tokens`), not a list
 
 Avoid `bg-white`, `text-gray-400` for real text (2.5:1 on white), and raw `red-*`/`emerald-*` for status colour. The end-to-end tests check every theme in light and dark against WCAG 2.x AA and fail on any contrast violation.
 
+## Branching
+
+`main` is what gets released, so it only receives changes that already passed CI. Day-to-day work happens on `dev`:
+
+```bash
+git switch dev && git pull            # start from the latest dev
+git switch -c feature/short-name      # optional: one branch per piece of work
+# ...work, commit, push; open a pull request into dev (CI runs on it)
+```
+
+- **`dev`**: integration branch, free to push to. CI runs on every push. If something goes wrong, undo it on `dev` (`git revert <sha>`, or a pull request that reverts) and `main` never sees it.
+- **Releasing**: open a pull request **dev → main**, wait for CI, and merge it with a **merge commit** (not squash, so the two branches stay in step). Include a changeset (`npm run changeset`) for any change to a published package. The **Version packages** workflow then opens its release pull request against `main`, as described below.
+- **After a release**, bring `main` back into `dev` (the version bump and changelogs only exist on `main`): `git switch dev && git pull origin main && git push`.
+- **Throwing work away**: delete the branch, or reset `dev` to `main` (`git switch dev && git reset --hard origin/main && git push --force-with-lease`) if `dev` has gone wrong. This is why `main` is protected and `dev` is not.
+- Tags and releases are only ever made on `main`.
+
 ## Releasing
 
 Packages are versioned together while the API settles (`0.x`). Releases are published by GitHub Actions using npm trusted publishing: no npm token is stored anywhere, and every version carries an npm provenance badge.
