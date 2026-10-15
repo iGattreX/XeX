@@ -69,7 +69,17 @@ Inside the repo the docs site imports the packages' **source** (Vite aliases), s
 
 ## Releasing
 
-Packages are versioned together while the API settles (`0.x`). Publishing is `npm publish -w @xex/tokens -w @xex/tailwind-preset -w @xex/ui` from a clean, built tree (`publishConfig.access` is already `public`). Prefer publishing from CI with npm provenance rather than from a laptop.
+Packages are versioned together while the API settles (`0.x`). Releases are published by GitHub Actions using npm trusted publishing: no npm token is stored anywhere, and every version carries an npm provenance badge.
+
+```bash
+node scripts/set-version.mjs 0.1.1   # sets every package, the internal @xex/* ranges and the lockfile
+git add -A && git commit -m "Release v0.1.1" && git push
+git tag v0.1.1 && git push origin v0.1.1
+```
+
+Pushing the tag starts the Release workflow: it type-checks, builds, publishes any package version not yet on npm, and creates the GitHub release. It refuses to run if the tag and the package versions disagree.
+
+One-time setup (already done for 0.1.0 if you followed the repo's setup): on npmjs.com open each package → Settings → Trusted Publisher → GitHub Actions, and enter owner `iGattreX`, repository `xex`, workflow filename `release.yml`, environment empty.
 
 ## Licence
 
