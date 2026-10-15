@@ -18,5 +18,12 @@
   },
   "devDependencies": {
     "typescript": "^5.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iGattreX/xex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iGattreX/xex/issues"
   }
 }

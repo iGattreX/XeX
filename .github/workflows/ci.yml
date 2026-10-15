@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel an older run of the same branch/PR when a newer commit arrives.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Builds the packages first, then type-checks tokens, ui and the docs site.
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build packages and docs site
+        run: npm run build
+
+      - name: Contrast audit (WCAG AA for every theme)
+        run: npm run audit:contrast
+
+      # Lists exactly what each package would publish; fails if packing breaks.
+      - name: Check publishable contents
+        run: npm run pack:check

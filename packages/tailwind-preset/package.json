@@ -3,6 +3,20 @@
   "version": "0.1.0",
   "description": "Tailwind CSS preset for the XeX design system: theme-driven brand colour scale and fonts.",
   "license": "MIT",
+  "keywords": [
+    "tailwindcss",
+    "tailwind-preset",
+    "design-system"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iGattreX/xex.git",
+    "directory": "packages/tailwind-preset"
+  },
+  "homepage": "https://github.com/iGattreX/xex#readme",
+  "bugs": {
+    "url": "https://github.com/iGattreX/xex/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./index.js",

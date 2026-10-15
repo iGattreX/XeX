@@ -3,6 +3,21 @@
   "version": "0.1.0",
   "description": "XeX design tokens: colour themes, font helpers and the shared stylesheet.",
   "license": "MIT",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "themes",
+    "tailwind"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iGattreX/xex.git",
+    "directory": "packages/tokens"
+  },
+  "homepage": "https://github.com/iGattreX/xex#readme",
+  "bugs": {
+    "url": "https://github.com/iGattreX/xex/issues"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css"
