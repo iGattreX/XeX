@@ -5,7 +5,7 @@ name: Release
 # The trusted publisher on npm allows STAGED publishing only: CI uploads each package, and a
 # maintainer approves it with 2FA (npmjs.com, or `npm stage list` / `npm stage approve`).
 # Setup: on npmjs.com, for each package, Settings -> Trusted Publisher -> GitHub Actions:
-#   owner iGattreX, repository xex, workflow filename release.yml (leave environment empty).
+#   owner iGattreX, repository XeX, workflow filename release.yml (leave environment empty).
 on:
   push:
     tags: ['v*']

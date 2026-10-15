@@ -10,12 +10,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iGattreX/xex.git",
+    "url": "git+https://github.com/iGattreX/XeX.git",
     "directory": "packages/tailwind-preset"
   },
-  "homepage": "https://github.com/iGattreX/xex#readme",
+  "homepage": "https://github.com/iGattreX/XeX#readme",
   "bugs": {
-    "url": "https://github.com/iGattreX/xex/issues"
+    "url": "https://github.com/iGattreX/XeX/issues"
   },
   "type": "module",
   "sideEffects": false,

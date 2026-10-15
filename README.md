@@ -105,7 +105,7 @@ Note: pull requests opened by a workflow with the default token do not trigger o
 
 The npm trusted publisher only allows staged publishing, so nothing is public until you approve it (2FA): on npmjs.com for each package, or in a terminal with `npm stage list` and `npm stage approve`. Approve `@xex/tokens` first, then `@xex/tailwind-preset`, then `@xex/ui` (ui depends on tokens).
 
-One-time setup, per package, on npmjs.com: Settings → Trusted Publisher → GitHub Actions → owner `iGattreX`, repository `xex`, workflow filename `release.yml`, environment empty; leave "direct publish" and "dist-tag management" off.
+One-time setup, per package, on npmjs.com: Settings → Trusted Publisher → GitHub Actions → owner `iGattreX`, repository `XeX`, workflow filename `release.yml`, environment empty; leave "direct publish" and "dist-tag management" off.
 
 ## Licence
 
