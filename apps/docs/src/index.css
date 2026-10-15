@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The design system's shared rules (brand overrides, dark mode, .card, .nav-item-*, loaders …) are
+   imported from JS: see main.tsx (`import '@xex/tokens/styles.css'`). */
