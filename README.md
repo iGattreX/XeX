@@ -77,9 +77,11 @@ git add -A && git commit -m "Release v0.1.1" && git push
 git tag v0.1.1 && git push origin v0.1.1
 ```
 
-Pushing the tag starts the Release workflow: it type-checks, builds, publishes any package version not yet on npm, and creates the GitHub release. It refuses to run if the tag and the package versions disagree.
+Pushing the tag starts the Release workflow: it type-checks, builds, **stages** every package version not yet on npm, and creates the GitHub release. It refuses to run if the tag and the package versions disagree.
 
-One-time setup (already done for 0.1.0 if you followed the repo's setup): on npmjs.com open each package → Settings → Trusted Publisher → GitHub Actions, and enter owner `iGattreX`, repository `xex`, workflow filename `release.yml`, environment empty.
+The npm trusted publisher only allows staged publishing, so nothing is public until you approve it (2FA): on npmjs.com for each package, or in a terminal with `npm stage list` and `npm stage approve`. Approve `@xex/tokens` first, then `@xex/tailwind-preset`, then `@xex/ui` (ui depends on tokens).
+
+One-time setup, per package, on npmjs.com: Settings → Trusted Publisher → GitHub Actions → owner `iGattreX`, repository `xex`, workflow filename `release.yml`, environment empty; leave "direct publish" and "dist-tag management" off.
 
 ## Licence
 

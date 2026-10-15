@@ -1,7 +1,9 @@
 name: Release
 
-# Publishes to npm when a version tag (vX.Y.Z) is pushed.
+# Stages a release on npm when a version tag (vX.Y.Z) is pushed.
 # Uses npm trusted publishing (OIDC): there is no npm token anywhere in this repo.
+# The trusted publisher on npm allows STAGED publishing only: CI uploads each package, and a
+# maintainer approves it with 2FA (npmjs.com, or `npm stage list` / `npm stage approve`).
 # Setup: on npmjs.com, for each package, Settings -> Trusted Publisher -> GitHub Actions:
 #   owner iGattreX, repository xex, workflow filename release.yml (leave environment empty).
 on:
@@ -23,7 +25,7 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
+          package-manager-cache: false # never use caches in release builds
 
       # Trusted publishing needs npm >= 11.5.1.
       - name: Update npm
@@ -52,7 +54,8 @@ jobs:
         run: npm run audit:contrast
 
       # Order matters: ui depends on tokens. Versions already on npm are skipped, so a re-run is safe.
-      - name: Publish
+      # `npm stage publish` uploads the package for review; nothing is public until it is approved.
+      - name: Stage packages on npm
         run: |
           for dir in tokens tailwind-preset ui; do
             name=$(node -p "require('./packages/$dir/package.json').name")
@@ -60,10 +63,11 @@ jobs:
             if npm view "$name@$version" version >/dev/null 2>&1; then
               echo "$name@$version is already published, skipping"
             else
-              npm publish -w "$name" --access public --provenance
+              (cd "packages/$dir" && npm stage publish --access public)
             fi
           done
 
+      # The GitHub release is created now; the npm packages go live when you approve them.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
