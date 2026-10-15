@@ -4,16 +4,16 @@ export type ProgressTone = 'brand' | 'success' | 'warning' | 'danger'
 
 const fills: Record<ProgressTone, string> = {
   brand: 'bg-brand-600',
-  success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  danger: 'bg-red-500',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-danger',
 }
 
 const strokes: Record<ProgressTone, string> = {
-  brand: 'text-brand-600',
-  success: 'text-emerald-500',
-  warning: 'text-amber-500',
-  danger: 'text-red-500',
+  brand: 'text-accent',
+  success: 'text-success',
+  warning: 'text-warning',
+  danger: 'text-danger',
 }
 
 const heights = { sm: 'h-1', md: 'h-2', lg: 'h-3' }

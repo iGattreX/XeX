@@ -177,18 +177,18 @@ export function FontPicker() {
               openList()
             }
           }}
-          className="flex w-full cursor-default items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+          className="flex w-full cursor-default items-center justify-between rounded-lg border border-gray-300 bg-surface px-3 py-2 text-left text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
         >
           <span className="truncate" style={{ fontFamily: fontStack(font) }}>
             {font.family}
           </span>
-          <ChevronUpDownIcon className="h-5 w-5 shrink-0 text-gray-400" />
+          <ChevronUpDownIcon className="h-5 w-5 shrink-0 text-gray-500" />
         </button>
 
         {open && (
-          <div className="absolute left-0 right-0 z-40 mt-1 rounded-xl border border-gray-200 bg-white p-2 shadow-xl">
+          <div className="absolute left-0 right-0 z-40 mt-1 rounded-xl border border-gray-200 bg-surface p-2 shadow-xl">
             <div className="relative">
-              <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 autoFocus
                 value={query}
@@ -201,7 +201,7 @@ export function FontPicker() {
                 aria-label="Search fonts"
                 aria-activedescendant={matches[active] ? optId(active) : undefined}
                 placeholder="Search Google Fonts…"
-                className="w-full rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+                className="w-full rounded-lg border border-gray-300 bg-surface py-1.5 pl-8 pr-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
               />
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
@@ -227,7 +227,7 @@ export function FontPicker() {
                 </li>
               )}
               {catalog.status === 'error' && (
-                <li className="px-3 py-2 text-sm text-red-600">
+                <li className="px-3 py-2 text-sm text-danger-ink">
                   Couldn’t load the font list.{' '}
                   <button type="button" className="font-medium underline" onClick={catalog.retry}>
                     Retry
@@ -244,20 +244,20 @@ export function FontPicker() {
                     className={clsx(
                       'flex w-full cursor-default items-center justify-between rounded-md px-3 py-1.5 text-left text-sm text-gray-800',
                       i === active && 'bg-gray-100 ring-2 ring-inset ring-brand-300',
-                      f.family === font.family && 'bg-brand-50 font-medium',
+                      f.family === font.family && 'bg-accent-soft font-medium',
                     )}
                   >
                     <span style={{ fontFamily: fontStack(f) }}>{f.family}</span>
-                    <span className="flex items-center gap-2 text-xs text-gray-400">
+                    <span className="flex items-center gap-2 text-xs text-gray-500">
                       {f.category}
-                      {f.family === font.family && <CheckIcon className="h-4 w-4 text-brand-600" />}
+                      {f.family === font.family && <CheckIcon className="h-4 w-4 text-accent" />}
                     </span>
                   </button>
                 </li>
               ))}
               {catalog.status === 'ready' && matches.length === 0 && <li className="px-3 py-2 text-sm text-gray-500">No fonts match.</li>}
               {visible < matches.length && (
-                <li className="px-3 py-2 text-xs text-gray-400">
+                <li className="px-3 py-2 text-xs text-gray-500">
                   Showing {visible} of {matches.length} — scroll for more
                 </li>
               )}
@@ -270,7 +270,7 @@ export function FontPicker() {
       <div className="flex items-center gap-2" style={{ fontFamily: fontStack(DEFAULT_FONT) }}>
         <p className="text-sm text-gray-500">
           Selected: <span className="font-semibold text-gray-900">{font.family}</span>
-          {font.stack ? '' : <span className="text-gray-400"> · {font.category}</span>}
+          {font.stack ? '' : <span className="text-gray-500"> · {font.category}</span>}
         </p>
         <Button
           size="xs"

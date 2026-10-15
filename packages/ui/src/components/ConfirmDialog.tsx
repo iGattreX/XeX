@@ -25,11 +25,11 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Modal open={open} onClose={onCancel} size="lg" ariaLabel={title}>
-      <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-        <ExclamationTriangleIcon className="mt-0.5 h-6 w-6 shrink-0 text-red-600" />
+      <div role="alert" className="flex items-start gap-3 rounded-xl border border-danger-line bg-danger-soft p-4">
+        <ExclamationTriangleIcon className="mt-0.5 h-6 w-6 shrink-0 text-danger-ink" />
         <div>
-          <p className="font-bold text-red-800">{title}</p>
-          <p className="mt-1 text-sm text-red-700">{message}</p>
+          <p className="font-bold text-danger-ink">{title}</p>
+          <p className="mt-1 text-sm text-danger-ink">{message}</p>
         </div>
       </div>
       <div className="mt-5 flex justify-end gap-2">

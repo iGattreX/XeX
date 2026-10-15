@@ -11,7 +11,7 @@ const sizes: Record<AvatarSize, string> = {
 }
 
 /** Rotating palette, deliberately independent of the brand theme. */
-export const AVATAR_COLORS = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6']
+export const AVATAR_COLORS = ['#4f46e5', '#0369a1', '#047857', '#b45309', '#dc2626', '#7c3aed', '#db2777', '#0f766e']
 
 export function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)

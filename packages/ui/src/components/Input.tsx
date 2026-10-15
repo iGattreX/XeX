@@ -21,7 +21,7 @@ export function Input({ label, error, hint, icon, className, id, ...rest }: Inpu
       )}
       <div className="relative">
         {icon && (
-          <span className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 items-center text-gray-400 [&>svg]:h-5 [&>svg]:w-5">
+          <span className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 items-center text-gray-500 [&>svg]:h-5 [&>svg]:w-5">
             {icon}
           </span>
         )}
@@ -29,16 +29,16 @@ export function Input({ label, error, hint, icon, className, id, ...rest }: Inpu
           id={inputId}
           aria-invalid={!!error || undefined}
           className={clsx(
-            'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400',
+            'w-full rounded-lg border bg-surface px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400',
             'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400',
             'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
             icon && 'pl-9',
-            error ? 'border-red-400' : 'border-gray-300',
+            error ? 'border-danger' : 'border-gray-300',
           )}
           {...rest}
         />
       </div>
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : hint ? <p className="mt-1 text-xs text-gray-500">{hint}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : hint ? <p className="mt-1 text-xs text-gray-500">{hint}</p> : null}
     </div>
   )
 }

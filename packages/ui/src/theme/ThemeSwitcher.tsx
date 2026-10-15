@@ -41,7 +41,7 @@ export function ThemeSwitcher({ showLabels = false }: { showLabels?: boolean }) 
         type="button"
         onClick={toggleMode}
         aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
-        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-surface px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
       >
         {mode === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
         {mode === 'dark' ? 'Light' : 'Dark'}

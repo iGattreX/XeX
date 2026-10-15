@@ -55,7 +55,7 @@ export function Modal({ open, onClose, title, footer, size = 'md', ariaLabel, ch
         aria-label={title ? undefined : ariaLabel}
         tabIndex={-1}
         onKeyDown={trapTab}
-        className={clsx('relative flex max-h-[90vh] w-full flex-col rounded-2xl bg-white shadow-2xl focus:outline-none', sizes[size])}
+        className={clsx('relative flex max-h-[90vh] w-full flex-col rounded-2xl bg-surface shadow-2xl focus:outline-none', sizes[size])}
       >
         {title && (
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
@@ -66,7 +66,7 @@ export function Modal({ open, onClose, title, footer, size = 'md', ariaLabel, ch
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+              className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

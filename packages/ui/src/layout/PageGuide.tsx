@@ -177,7 +177,7 @@ export function PageGuide({ sections }: { sections: PageSection[] }) {
                   }}
                   className={clsx(
                     'block py-1.5 pl-3 pr-2 text-sm transition-colors',
-                    i === active ? 'font-medium text-brand-700' : 'text-gray-500 hover:text-gray-900',
+                    i === active ? 'font-medium text-accent' : 'text-gray-500 hover:text-gray-900',
                   )}
                 >
                   {s.label}

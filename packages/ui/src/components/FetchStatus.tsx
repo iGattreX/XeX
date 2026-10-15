@@ -25,12 +25,12 @@ export function FetchStatus({ state, messages, onRetry }: FetchStatusProps) {
   const text = messages?.[state] ?? defaults[state]
   return (
     <p role="status" aria-live="polite" className="flex items-center gap-2 text-sm">
-      {state === 'idle' && <CloudIcon className="h-5 w-5 text-gray-400" />}
-      {state === 'loading' && <Spinner size="md" decorative className="text-brand-600" />}
-      {state === 'success' && <CheckCircleIcon className="h-5 w-5 text-emerald-500" />}
-      {state === 'error' && <ExclamationCircleIcon className="h-5 w-5 text-red-500" />}
-      <span className={state === 'error' ? 'text-red-700' : state === 'idle' ? 'text-gray-500' : 'text-gray-700'}>{text}</span>
-      {state === 'loading' && <LoadingDots className="text-gray-400" />}
+      {state === 'idle' && <CloudIcon className="h-5 w-5 text-gray-500" />}
+      {state === 'loading' && <Spinner size="md" decorative className="text-accent" />}
+      {state === 'success' && <CheckCircleIcon className="h-5 w-5 text-success" />}
+      {state === 'error' && <ExclamationCircleIcon className="h-5 w-5 text-danger" />}
+      <span className={state === 'error' ? 'text-danger-ink' : state === 'idle' ? 'text-gray-500' : 'text-gray-700'}>{text}</span>
+      {state === 'loading' && <LoadingDots className="text-gray-500" />}
       {state === 'error' && onRetry && (
         <Button size="xs" variant="outline" onClick={onRetry}>
           Retry

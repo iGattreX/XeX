@@ -16,7 +16,7 @@ export function LoadingOverlay({ loading, label = 'Loading…', children, classN
       <div inert={loading || undefined}>{children}</div>
       {loading && (
         <div className="xex-overlay absolute inset-0 z-10 flex items-center justify-center gap-3 rounded-[inherit] backdrop-blur-[1px]">
-          <Spinner size="lg" label={label} className="text-brand-600" />
+          <Spinner size="lg" label={label} className="text-accent" />
           <span className="text-sm font-medium text-gray-700" aria-hidden="true">
             {label}
           </span>

@@ -133,7 +133,7 @@ export function Tabs({
                   sizes[size],
                   fullWidth && 'flex-1',
                   variant === 'underline'
-                    ? clsx('rounded-t-lg', isSelected ? 'text-brand-700' : 'text-gray-500 hover:text-gray-800')
+                    ? clsx('rounded-t-lg', isSelected ? 'text-accent' : 'text-gray-500 hover:text-gray-800')
                     : clsx('rounded-full', isSelected ? 'bg-brand-600 text-white' : 'text-gray-600 hover:bg-gray-100'),
                 )}
               >
@@ -143,7 +143,7 @@ export function Tabs({
                   <span
                     className={clsx(
                       'rounded-full px-1.5 py-px text-[11px] font-semibold tabular-nums',
-                      isSelected ? (variant === 'pills' ? 'bg-white/25 text-white' : 'bg-brand-100 text-brand-700') : 'bg-gray-100 text-gray-600',
+                      isSelected ? (variant === 'pills' ? 'bg-white/25 text-white' : 'bg-accent-softer text-accent') : 'bg-gray-100 text-gray-600',
                     )}
                   >
                     {item.badge}

@@ -65,7 +65,7 @@ function Tile({ name, component, children }: { name: string; component: string; 
     <div className="rounded-xl border border-gray-200 p-4">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
         <h3 className="text-sm font-semibold text-gray-900">{name}</h3>
-        <code className="font-mono text-[11px] text-gray-400">{component}</code>
+        <code className="font-mono text-[11px] text-gray-500">{component}</code>
       </div>
       {children}
     </div>
@@ -88,7 +88,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       <span
         className={clsx(
           // the button is what receives focus, so the ring is driven from it via `group`
-          'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-brand-400 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-white',
+          'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-brand-400 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface',
           checked ? 'bg-brand-600' : 'bg-gray-300',
         )}
       >
@@ -225,11 +225,11 @@ export function Playground() {
             <div key={s} className="text-center">
               <div className="h-12 rounded-lg border border-gray-200" style={{ backgroundColor: `var(--brand-${s})` }} />
               <p className="mt-1 text-[11px] font-medium text-gray-500">{s}</p>
-              <p className="font-mono text-[10px] text-gray-400">{theme.shades[s]}</p>
+              <p className="font-mono text-[10px] text-gray-500">{theme.shades[s]}</p>
             </div>
           ))}
         </div>
-        <div className="mt-5 rounded-xl bg-gradient-to-r from-brand-50 to-brand-100 p-4 text-sm font-medium text-brand-800 ring-1 ring-brand-200">
+        <div className="mt-5 rounded-xl bg-gradient-to-r from-accent-soft to-accent-softer p-4 text-sm font-medium text-accent-strong ring-1 ring-accent-line">
           Gradient + ring + text utilities all follow the theme.
         </div>
       </Section>
@@ -396,14 +396,14 @@ export function Playground() {
               id="notes"
               rows={3}
               placeholder="Write something…"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+              className="w-full rounded-lg border border-gray-300 bg-surface px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
             />
           </div>
           <div>
             <Label>Checkbox</Label>
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="h-4 w-4 rounded" />
-              I agree to the terms {agree && <CheckCircleIcon className="h-5 w-5 text-emerald-500" />}
+              I agree to the terms {agree && <CheckCircleIcon className="h-5 w-5 text-success" />}
             </label>
           </div>
           <div>
@@ -423,13 +423,14 @@ export function Playground() {
           </div>
           <div>
             <Label>Range · {volume}</Label>
-            <input type="range" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full" />
+            <input type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full" />
           </div>
           <div className="md:col-span-2 xl:col-span-3">
             <Label>File</Label>
             <input
               type="file"
-              className="block w-full text-sm text-gray-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+              aria-label="Upload a file"
+              className="block w-full text-sm text-gray-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:bg-accent-softer"
             />
           </div>
         </div>
@@ -445,7 +446,7 @@ export function Playground() {
           ))}
           <div className="ml-4 flex -space-x-2">
             {PEOPLE.slice(0, 6).map((p) => (
-              <Avatar key={p.id} name={p.name} size="md" className="ring-2 ring-white" />
+              <Avatar key={p.id} name={p.name} size="md" className="ring-2 ring-surface" />
             ))}
           </div>
         </div>
@@ -506,7 +507,7 @@ export function Playground() {
             { cls: 'stat-sky', label: 'Trials', value: '96' },
           ].map((s) => (
             <div key={s.cls} className={clsx(s.cls, 'rounded-xl p-4')}>
-              <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{s.label}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide">{s.label}</p>
               <p className="mt-1 text-2xl font-bold">{s.value}</p>
             </div>
           ))}
@@ -517,16 +518,16 @@ export function Playground() {
           </span>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-100 px-3 py-2 text-sm text-emerald-700">
+          <div className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm text-success-ink">
             <CheckCircleIcon className="h-5 w-5" /> Changes saved successfully.
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-700">
+          <div className="flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-ink">
             <ExclamationCircleIcon className="h-5 w-5" /> Your trial ends in 3 days.
           </div>
         </div>
         <div className="mt-5 flex items-center gap-3 text-gray-500">
           <Squares2X2Icon className="h-6 w-6" /> <span className="text-xs">outline 24 = neutral</span>
-          <CheckCircleIcon className="h-5 w-5 text-brand-600" /> <span className="text-xs">solid 20 = status/emphasis</span>
+          <CheckCircleIcon className="h-5 w-5 text-accent" /> <span className="text-xs">solid 20 = status/emphasis</span>
         </div>
       </Section>
 
@@ -537,22 +538,22 @@ export function Playground() {
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Tile name="Spinner" component="<Spinner />">
-            <div className="flex flex-wrap items-end gap-5 text-brand-600">
+            <div className="flex flex-wrap items-end gap-5 text-accent">
               {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((sz) => (
                 <div key={sz} className="text-center">
                   <Spinner size={sz} />
                   <p className="mt-1 text-[11px] text-gray-500">{sz}</p>
                 </div>
               ))}
-              <Spinner size="lg" className="text-gray-400" />
-              <Spinner size="lg" className="text-emerald-500" />
+              <Spinner size="lg" className="text-gray-500" />
+              <Spinner size="lg" className="text-success" />
             </div>
           </Tile>
 
           <Tile name="Loading dots" component="<LoadingDots />">
             <div className="space-y-2 text-sm text-gray-700">
               <p className="flex items-center gap-2">
-                Fetching <LoadingDots className="text-brand-600" />
+                Fetching <LoadingDots className="text-accent" />
               </p>
               <p className="flex items-center gap-2">
                 Total: <LoadingDots />
@@ -666,7 +667,7 @@ export function Playground() {
 
           <Tile name="Refreshing icon" component="<ArrowPathIcon animate-spin />">
             <p className="flex items-center gap-2 text-sm text-gray-700">
-              <ArrowPathIcon className="h-5 w-5 animate-spin text-brand-600 motion-reduce:animate-none" aria-hidden="true" />
+              <ArrowPathIcon className="h-5 w-5 animate-spin text-accent motion-reduce:animate-none" aria-hidden="true" />
               Refreshing…
             </p>
           </Tile>

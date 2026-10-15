@@ -50,7 +50,7 @@ export function Sidebar({ items, active, onSelect, open, onClose }: SidebarProps
         aria-label="Main navigation"
         onKeyDown={open ? trapTab : undefined}
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white duration-200',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-surface duration-200',
           'lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:w-60 lg:shrink-0 lg:translate-x-0',
           // Closed on small screens: invisible = out of the tab order. It switches off only after
           // the slide-out finishes, but switches on immediately so focus can move in on open.
@@ -62,7 +62,7 @@ export function Sidebar({ items, active, onSelect, open, onClose }: SidebarProps
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">X</span>
             <span className="text-lg font-bold tracking-tight text-gray-900">XeX</span>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden">
+          <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 lg:hidden">
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>

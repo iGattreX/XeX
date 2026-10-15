@@ -65,12 +65,12 @@ export function MultiSelect({ options, value, onChange, label, className }: Mult
         aria-label={labels.length ? `${label}: ${labels.join(', ')}` : label}
         onClick={() => setOpen((o) => !o)}
         className={clsx(
-          'flex w-full items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400',
+          'flex w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400',
           value.length ? 'border-brand-500 text-gray-900' : 'border-gray-300 text-gray-500',
         )}
       >
         <span className="truncate">{summary}</span>
-        <ChevronDownIcon className="h-5 w-5 shrink-0 text-gray-400" />
+        <ChevronDownIcon className="h-5 w-5 shrink-0 text-gray-500" />
       </button>
 
       {open && (
@@ -83,20 +83,20 @@ export function MultiSelect({ options, value, onChange, label, className }: Mult
           onMouseDown={(e) => {
             if (!(e.target instanceof HTMLInputElement)) e.preventDefault()
           }}
-          className="absolute left-0 z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-1 shadow-xl"
+          className="absolute left-0 z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-xl border border-gray-200 bg-surface p-1 shadow-xl"
         >
           {options.map((o) => (
             <label key={o.value} className="flex cursor-default items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-gray-800 hover:bg-gray-50">
               <input type="checkbox" className="h-4 w-4 rounded" checked={value.includes(o.value)} onChange={() => toggle(o.value)} />
               <span className="flex-1 whitespace-nowrap">{o.label}</span>
-              {o.count !== undefined && <span className="text-xs tabular-nums text-gray-400">{o.count}</span>}
+              {o.count !== undefined && <span className="text-xs tabular-nums text-gray-500">{o.count}</span>}
             </label>
           ))}
           {value.length > 0 && (
             <button
               type="button"
               onClick={() => onChange([])}
-              className="mt-1 w-full rounded-md border-t border-gray-100 px-2.5 py-1.5 text-left text-xs font-medium text-brand-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+              className="mt-1 w-full rounded-md border-t border-gray-100 px-2.5 py-1.5 text-left text-xs font-medium text-accent hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
             >
               Clear selection
             </button>

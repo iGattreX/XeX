@@ -19,7 +19,7 @@ export interface DataTableColumn<T> {
   sortable?: boolean
   /** Adds a multi-select dropdown listing this column's distinct values (OR within a column, AND across columns). Default: false. */
   filter?: boolean
-  /** Placeholder for that dropdown, e.g. "All roles". */
+  /** Placeholder for that dropdown, e.g. "All roles". Defaults to "Any <header>". */
   filterLabel?: string
   align?: 'left' | 'right'
   /** Default width as a relative weight (a column with 2 starts twice as wide as one with 1). Default: 1. */
@@ -282,7 +282,7 @@ export function DataTable<T>({
             <MultiSelect
               key={c.id}
               className="w-full sm:w-44"
-              label={c.filterLabel ?? `All ${c.header.toLowerCase()}`}
+              label={c.filterLabel ?? `Any ${c.header.toLowerCase()}`}
               value={filters[c.id] ?? []}
               onChange={(v) => {
                 setFilters((f) => ({ ...f, [c.id]: v }))
@@ -364,7 +364,7 @@ export function DataTable<T>({
                         )}
                       >
                         <span className="truncate">{c.header}</span>
-                        <Icon className={clsx('h-4 w-4 shrink-0', sorted ? 'text-brand-600' : 'text-gray-400')} aria-hidden="true" />
+                        <Icon className={clsx('h-4 w-4 shrink-0', sorted ? 'text-accent' : 'text-gray-500')} aria-hidden="true" />
                       </button>
                     ) : (
                       <span className="block truncate">{c.header}</span>
@@ -418,7 +418,7 @@ export function DataTable<T>({
                 <td colSpan={columns.length} className="px-4 py-10 text-center text-sm text-gray-500">
                   {emptyMessage}{' '}
                   {filterActive && (
-                    <button type="button" onClick={clearAll} className="font-medium text-brand-700 underline">
+                    <button type="button" onClick={clearAll} className="font-medium text-accent underline">
                       Clear filters
                     </button>
                   )}

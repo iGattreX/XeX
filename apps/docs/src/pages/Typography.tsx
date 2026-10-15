@@ -33,7 +33,7 @@ export function Typography() {
           {SCALE.map(([name, cls]) => (
             <div key={name} className="flex items-baseline justify-between gap-4 py-3">
               <span className={`${cls} truncate text-gray-900`}>The quick brown fox</span>
-              <code className="shrink-0 font-mono text-xs text-gray-400">{name}</code>
+              <code className="shrink-0 font-mono text-xs text-gray-500">{name}</code>
             </div>
           ))}
         </div>
@@ -43,7 +43,7 @@ export function Typography() {
         <div className="grid gap-2 sm:grid-cols-2">
           {(['font-normal', 'font-medium', 'font-semibold', 'font-bold'] as const).map((w) => (
             <p key={w} className={`${w} text-lg text-gray-900`}>
-              Sphinx of black quartz <span className="font-mono text-xs font-normal text-gray-400">{w}</span>
+              Sphinx of black quartz <span className="font-mono text-xs font-normal text-gray-500">{w}</span>
             </p>
           ))}
         </div>

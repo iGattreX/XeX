@@ -62,7 +62,7 @@ export function PaginationBar({
             </button>
             {pageWindow(page, totalPages).map((p, i) =>
               p === null ? (
-                <span key={`gap-${i}`} className="px-1 text-gray-400">
+                <span key={`gap-${i}`} className="px-1 text-gray-500">
                   …
                 </span>
               ) : (
@@ -102,7 +102,7 @@ export function PaginationBar({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="rounded-md border border-gray-300 bg-white px-1.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+              className="rounded-md border border-gray-300 bg-surface px-1.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
             >
               {pageSizeOptions.map((n) => (
                 <option key={n} value={n}>

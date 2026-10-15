@@ -35,8 +35,8 @@ const SIZES = [
 // Full class strings so Tailwind can see them. '' = inherit (default).
 const COLORS = [
   { id: 'default', label: 'Default (inherit)', text: '', swatch: 'bg-gray-700' },
-  { id: 'brand', label: 'Brand (theme)', text: 'text-brand-600', swatch: 'bg-brand-600' },
-  { id: 'gray', label: 'Gray', text: 'text-gray-400', swatch: 'bg-gray-400' },
+  { id: 'brand', label: 'Brand (theme)', text: 'text-accent', swatch: 'bg-brand-600' },
+  { id: 'gray', label: 'Gray', text: 'text-gray-500', swatch: 'bg-gray-400' },
   { id: 'red', label: 'Red', text: 'text-red-500', swatch: 'bg-red-500' },
   { id: 'amber', label: 'Amber', text: 'text-amber-500', swatch: 'bg-amber-500' },
   { id: 'emerald', label: 'Emerald', text: 'text-emerald-500', swatch: 'bg-emerald-500' },
@@ -110,14 +110,14 @@ export function Icons() {
               <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
               <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
               <XCircleIcon className="h-5 w-5 text-red-500" />
-              <BellIcon className="h-5 w-5 text-brand-600" />
+              <BellIcon className="h-5 w-5 text-accent" />
             </div>
             <p className="mt-3 text-sm font-semibold text-gray-900">Solid · 24 / 20</p>
             <p className="text-xs text-gray-500">Emphasis and status. Use 20/solid for small inline icons.</p>
           </div>
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-            <p className="font-mono text-xs text-red-700">w-4.5 h-4.5 ✗</p>
-            <p className="font-mono text-xs text-emerald-700">w-4 h-4 · w-5 h-5 · w-6 h-6 ✓</p>
+          <div className="rounded-xl border border-gray-200 p-4">
+            <p className="font-mono text-xs text-danger-ink">w-4.5 h-4.5 ✗</p>
+            <p className="font-mono text-xs text-success-ink">w-4 h-4 · w-5 h-5 · w-6 h-6 ✓</p>
             <p className="mt-3 text-sm font-semibold text-gray-900">Valid steps only</p>
             <p className="text-xs text-gray-500">Fractional steps like w-4.5 don’t exist; Tailwind drops them and the SVG stays unconstrained.</p>
           </div>
@@ -128,7 +128,7 @@ export function Icons() {
         <div className="flex flex-wrap items-end gap-8">
           {SIZES.map((s) => (
             <div key={s.value} className="text-center">
-              <Outline24.HeartIcon className={clsx(s.value, 'mx-auto text-brand-600')} />
+              <Outline24.HeartIcon className={clsx(s.value, 'mx-auto text-accent')} />
               <p className="mt-2 font-mono text-[11px] text-gray-500">{s.value.split(' ')[0]}</p>
             </div>
           ))}
@@ -184,15 +184,15 @@ export function Icons() {
         </div>
 
         {Selected && selected && (
-          <div className="mt-5 flex flex-wrap items-center gap-5 rounded-xl border border-brand-200 bg-brand-50 p-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white text-gray-800 shadow-sm">
+          <div className="mt-5 flex flex-wrap items-center gap-5 rounded-xl border border-accent-line bg-accent-soft p-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-surface text-gray-800 shadow-sm">
               <Selected className={iconClass} />
             </div>
             <div className="min-w-0 flex-1 space-y-1.5">
               <p className="font-semibold text-gray-900">{selected}</p>
               {[importLine(selected), jsx(selected)].map((line) => (
                 <div key={line} className="flex items-center gap-2">
-                  <code className="min-w-0 flex-1 truncate rounded-md bg-white px-2 py-1 font-mono text-xs text-gray-700">{line}</code>
+                  <code className="min-w-0 flex-1 truncate rounded-md bg-surface px-2 py-1 font-mono text-xs text-gray-700">{line}</code>
                   <Button
                     size="xs"
                     variant="secondary"
@@ -220,7 +220,7 @@ export function Icons() {
                 onClick={() => setSelected(name)}
                 className={clsx(
                   'flex flex-col items-center gap-2 rounded-lg border p-3 text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
-                  name === selected ? 'border-brand-500 bg-brand-50' : 'border-gray-200',
+                  name === selected ? 'border-brand-500 bg-accent-soft' : 'border-gray-200',
                 )}
               >
                 <Icon className={iconClass} />
