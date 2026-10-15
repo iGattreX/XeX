@@ -86,18 +86,18 @@ Avoid `bg-white`, `text-gray-400` for real text (2.5:1 on white), and raw `red-*
 
 ## Branching
 
-`main` is what gets released, so it only receives changes that already passed CI. Day-to-day work happens on `dev`:
+`main` is what gets released, and it is protected: changes reach it through a pull request that passes CI. Do each piece of work on a short-lived branch:
 
 ```bash
-git switch dev && git pull            # start from the latest dev
-git switch -c feature/short-name      # optional: one branch per piece of work
-# ...work, commit, push; open a pull request into dev (CI runs on it)
+git switch main && git pull           # start from the latest main
+git switch -c feat/short-name         # one branch per piece of work (feat/, fix/, chore/ …)
+# ...work and commit; push; open a pull request into main (CI runs on it)
 ```
 
-- **`dev`**: integration branch, free to push to. CI runs on every push. If something goes wrong, undo it on `dev` (`git revert <sha>`, or a pull request that reverts) and `main` never sees it.
-- **Releasing**: open a pull request **dev → main**, wait for CI, and merge it with a **merge commit** (not squash, so the two branches stay in step). Include a changeset (`npm run changeset`) for any change to a published package. The **Version packages** workflow then opens its release pull request against `main`, as described below.
-- **After a release**, bring `main` back into `dev` (the version bump and changelogs only exist on `main`): `git switch dev && git pull origin main && git push`.
-- **Throwing work away**: delete the branch, or reset `dev` to `main` (`git switch dev && git reset --hard origin/main && git push --force-with-lease`) if `dev` has gone wrong. This is why `main` is protected and `dev` is not.
+- **Merging**: squash-merge the pull request (it is the only method enabled). The branch is deleted automatically, and `main` gets one tidy commit.
+- **Undoing**: nothing touches `main` until the pull request merges, so abandoning a branch costs nothing. To undo something already merged, open a pull request that reverts it (`git revert <sha>`).
+- **Changesets**: include one (`npm run changeset`) with any change to a published package. The **Version packages** workflow then opens its release pull request against `main`, as described below.
+- Keep branches small and short-lived; rebase on `main` (`git pull --rebase origin main`) if yours falls behind.
 - Tags and releases are only ever made on `main`.
 
 ## Releasing
