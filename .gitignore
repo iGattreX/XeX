@@ -5,3 +5,5 @@ dist/
 npm-debug.log*
 *.tsbuildinfo
 .claude/settings.local.json
+test-results/
+playwright-report/

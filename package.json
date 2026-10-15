@@ -14,9 +14,14 @@
     "build": "npm run build:packages && npm run build -w @xex/docs",
     "typecheck": "npm run build:packages && npm run typecheck -w @xex/tokens -w @xex/ui -w @xex/docs",
     "audit:contrast": "npm run audit:contrast -w @xex/tokens",
-    "pack:check": "npm run build:packages && npm pack --dry-run -w @xex/tokens -w @xex/tailwind-preset -w @xex/ui"
+    "pack:check": "npm run build:packages && npm pack --dry-run -w @xex/tokens -w @xex/tailwind-preset -w @xex/ui",
+    "test": "npm run build:packages && npm run test -w @xex/ui",
+    "test:e2e": "npm run build && npm run test:e2e -w @xex/docs",
+    "changeset": "changeset",
+    "version": "changeset version && npm install --package-lock-only --ignore-scripts --no-audit --no-fund"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "typescript": "^5.7.2"
   },
   "repository": {

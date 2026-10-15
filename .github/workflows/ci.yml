@@ -34,6 +34,24 @@ jobs:
       - name: Build packages and docs site
         run: npm run build
 
+      - name: Unit and component tests (includes structural accessibility checks)
+        run: npm run test -w @xex/ui
+
+      # Real-browser axe checks (WCAG 2.x A/AA, incl. colour contrast) for every theme in light and dark.
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end accessibility tests
+        run: npm run test:e2e -w @xex/docs
+
+      - name: Upload test report on failure
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-traces
+          path: apps/docs/test-results
+          if-no-files-found: ignore
+
       - name: Contrast audit (WCAG AA for every theme)
         run: npm run audit:contrast
 

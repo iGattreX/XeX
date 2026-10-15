@@ -1,0 +1,38 @@
+name: Version packages
+
+# Keeps a "Version packages" pull request up to date from the pending changesets (.changeset/*.md).
+# Merge it, then tag the new version to release it (see the Release workflow).
+on:
+  push:
+    branches: [main]
+
+concurrency: version-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: changesets/action@v1
+        with:
+          # `changeset version` + refresh the lockfile so `npm ci` keeps working on the PR
+          version: npm run version
+          title: Version packages
+          commit: Version packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
