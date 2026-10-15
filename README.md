@@ -99,13 +99,15 @@ git pull
 git tag v0.2.0 && git push origin v0.2.0
 ```
 
-Pushing the tag starts the Release workflow: it type-checks, builds, runs the tests, **stages** every package version not yet on npm, and creates the GitHub release. It refuses to run if the tag and the package versions disagree.
+Pushing the tag starts the Release workflow: it type-checks, builds, runs the tests, **publishes** every package version not yet on npm (in order: tokens, preset, ui), and creates the GitHub release. It refuses to run if the tag and the package versions disagree. Because publishing is automatic, the tag is the release decision: only tag a commit whose CI is green.
+
+Authentication is npm trusted publishing (OIDC): no token is stored, and every version carries a provenance badge. The trusted publisher on npm allows **direct publish**; if you would rather require a 2FA approval for each release, turn it off there, change `npm publish` to `npm stage publish` in `release.yml`, and approve each staged version on npmjs.com (or with `npm stage approve`).
 
 Note: pull requests opened by a workflow with the default token do not trigger other workflows, so the "Version packages" PR shows no CI checks. The repo owner can merge it anyway (branch protection does not apply to admins); CI runs on `main` right after.
 
 The npm trusted publisher only allows staged publishing, so nothing is public until you approve it (2FA): on npmjs.com for each package, or in a terminal with `npm stage list` and `npm stage approve`. Approve `@xex/tokens` first, then `@xex/tailwind-preset`, then `@xex/ui` (ui depends on tokens).
 
-One-time setup, per package, on npmjs.com: Settings → Trusted Publisher → GitHub Actions → owner `iGattreX`, repository `XeX`, workflow filename `release.yml`, environment empty; leave "direct publish" and "dist-tag management" off.
+One-time setup, per package, on npmjs.com: Settings → Trusted Publisher → GitHub Actions → owner `iGattreX`, repository `XeX`, workflow filename `release.yml`, environment empty; enable "direct publish" (the workflow runs `npm publish`) and leave "dist-tag management" off.
 
 ## Licence
 
