@@ -1,4 +1,4 @@
-import { useState, type FocusEvent, type PointerEvent } from 'react'
+import { useLayoutEffect, useState, type FocusEvent, type PointerEvent } from 'react'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, Square2StackIcon } from '@heroicons/react/24/outline'
 import { codeFor } from './snippets'
 
@@ -68,20 +68,36 @@ export function CodeDock({ target }: { target: Target | null }) {
     }
   }
 
+  // Sits just under the sticky page header, whatever height that has at the current width.
+  const [top, setTop] = useState(0)
+  useLayoutEffect(() => {
+    const header = document.querySelector('header')
+    if (!header) return
+    const measure = () => setTop(header.getBoundingClientRect().height)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(header)
+    return () => ro.disconnect()
+  }, [])
+
   return (
-    <section aria-label="Code for the control you are using" className="sticky bottom-3 z-20 overflow-hidden rounded-xl border border-accent-line bg-surface shadow-lg">
+    <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 -mb-4 bg-canvas pb-1">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-center gap-2 bg-brand-700 px-4 py-1 text-xs font-medium text-white hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+        className="group flex w-full items-center gap-3 rounded py-1 text-xs font-medium text-accent hover:text-accent-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
       >
-        <CodeBracketIcon className="h-4 w-4" />
-        {open ? 'Hide code' : 'Expand for code'}
-        {open ? <ChevronDownIcon className="h-3.5 w-3.5" /> : <ChevronUpIcon className="h-3.5 w-3.5" />}
+        <span className="h-px flex-1 bg-brand-600 group-hover:bg-brand-800" aria-hidden="true" />
+        <span className="flex items-center gap-1.5">
+          <CodeBracketIcon className="h-4 w-4" />
+          {open ? 'Hide code' : 'Expand for code'}
+          {open ? <ChevronUpIcon className="h-3.5 w-3.5" /> : <ChevronDownIcon className="h-3.5 w-3.5" />}
+        </span>
+        <span className="h-px flex-1 bg-brand-600 group-hover:bg-brand-800" aria-hidden="true" />
       </button>
       {open && (
-        <div className="p-3">
+        <div className="rounded-xl border border-accent-line bg-surface p-3 shadow-lg">
           {code && target ? (
             <>
               <div className="mb-2 flex items-center justify-between gap-2">

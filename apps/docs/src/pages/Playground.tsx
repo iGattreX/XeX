@@ -198,6 +198,7 @@ export function Playground() {
 
   return (
     <div className="space-y-8" {...dock.handlers}>
+      <CodeDock target={dock.target} />
       <Section id="theme" title="Theme" description={`Active: ${theme.name}. Choice persists in localStorage; shades are written to --brand-* on <html>.`}>
         <div data-code="ThemeSwitcher">
           <ThemeSwitcher showLabels />
@@ -672,7 +673,6 @@ export function Playground() {
         </div>
       </Section>
 
-      <CodeDock target={dock.target} />
     </div>
   )
 }
