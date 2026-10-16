@@ -198,7 +198,7 @@ export function Playground() {
 
   return (
     <div className="space-y-8" {...dock.handlers}>
-      <CodeDock target={dock.target} />
+      <CodeDock target={dock.target} spot={dock.spot} onLocate={dock.locate} onSpotDone={dock.clearSpot} />
       <Section id="theme" title="Theme" description={`Active: ${theme.name}. Choice persists in localStorage; shades are written to --brand-* on <html>.`}>
         <div data-code="ThemeSwitcher">
           <ThemeSwitcher showLabels />
@@ -208,7 +208,7 @@ export function Playground() {
           <FontPicker />
           <p className="mt-3 text-sm text-gray-600">The quick brown fox jumps over the lazy dog — 0123456789</p>
         </div>
-        <div className="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10">
+        <div className="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10" data-code="BrandShades">
           {SHADE_STEPS.map((s) => (
             <div key={s} className="text-center">
               <div className="h-12 rounded-lg border border-gray-200" style={{ backgroundColor: `var(--brand-${s})` }} />
@@ -217,7 +217,7 @@ export function Playground() {
             </div>
           ))}
         </div>
-        <div className="mt-5 rounded-xl bg-gradient-to-r from-accent-soft to-accent-softer p-4 text-sm font-medium text-accent-strong ring-1 ring-accent-line">
+        <div data-code="Gradient" className="mt-5 rounded-xl bg-gradient-to-r from-accent-soft to-accent-softer p-4 text-sm font-medium text-accent-strong ring-1 ring-accent-line">
           Gradient + ring + text utilities all follow the theme.
         </div>
       </Section>
@@ -397,11 +397,12 @@ export function Playground() {
           </div>
           <div>
             <Label>Range · {volume}</Label>
-            <input type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full" />
+            <input data-code="Range" type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full" />
           </div>
           <div className="md:col-span-2 xl:col-span-3">
             <Label>File</Label>
             <input
+              data-code="FileInput"
               type="file"
               aria-label="Upload a file"
               className="block w-full text-sm text-gray-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:bg-accent-softer"
@@ -418,7 +419,7 @@ export function Playground() {
               <p className="mt-1 text-[11px] text-gray-500">{s}</p>
             </div>
           ))}
-          <div className="ml-4 flex -space-x-2">
+          <div className="ml-4 flex -space-x-2" data-code="Avatar" data-code-props='name="Ada Lovelace" size="md"'>
             {PEOPLE.slice(0, 6).map((p) => (
               <Avatar key={p.id} name={p.name} size="md" className="ring-2 ring-surface" />
             ))}
@@ -480,22 +481,22 @@ export function Playground() {
             { cls: 'stat-rose', label: 'Churned', value: '12' },
             { cls: 'stat-sky', label: 'Trials', value: '96' },
           ].map((s) => (
-            <div key={s.cls} className={clsx(s.cls, 'rounded-xl p-4')}>
+            <div key={s.cls} className={clsx(s.cls, 'rounded-xl p-4')} data-code="StatCard" data-code-props={s.cls}>
               <p className="text-xs font-semibold uppercase tracking-wide">{s.label}</p>
               <p className="mt-1 text-2xl font-bold">{s.value}</p>
             </div>
           ))}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-6 text-sm text-gray-700">
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2" data-code="WeightPill">
             Weights <span className="weight-pill">3</span> <span className="weight-pill">12</span> <span className="weight-pill">100</span>
           </span>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm text-success-ink">
+          <div data-code="Alert" data-code-props="success" className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm text-success-ink">
             <CheckCircleIcon className="h-5 w-5" /> Changes saved successfully.
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-ink">
+          <div data-code="Alert" data-code-props="warning" className="flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-ink">
             <ExclamationCircleIcon className="h-5 w-5" /> Your trial ends in 3 days.
           </div>
         </div>
@@ -639,7 +640,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Refreshing icon" component="<ArrowPathIcon animate-spin />">
+          <Tile code="RefreshingIcon" name="Refreshing icon" component="<ArrowPathIcon animate-spin />">
             <p className="flex items-center gap-2 text-sm text-gray-700">
               <ArrowPathIcon className="h-5 w-5 animate-spin text-accent motion-reduce:animate-none" aria-hidden="true" />
               Refreshing…

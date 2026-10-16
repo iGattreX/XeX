@@ -52,7 +52,30 @@ export const SNIPPETS: Record<string, Snippet> = {
   PageGuide: () => `<PageGuide sections={[{ id: 'intro', label: 'Intro' }, { id: 'usage', label: 'Usage' }]} />`,
   Section: () => `<Section id="intro" title="Intro" description="Shown in the On this page guide">\n  …\n</Section>`,
   FontPicker: () => `<FontPicker />`,
+
+  // Not components: native inputs and global classes the system styles. Listed here so every
+  // control on the Controls page can show how to get that look.
+  Range: () => `<input type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-brand-600" />`,
+  FileInput: () => `<input
+  type="file"
+  aria-label="Upload a file"
+  className="block w-full text-sm text-gray-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent hover:file:bg-accent-softer"
+/>`,
+  StatCard: (p) => `<div className="${p ?? 'stat-indigo'} rounded-xl p-4">
+  <p className="text-xs font-semibold uppercase tracking-wide">Revenue</p>
+  <p className="mt-1 text-2xl font-bold">$48.2k</p>
+</div>`,
+  WeightPill: () => `<span className="weight-pill">12</span>`,
+  Alert: (p) => `<div className="flex items-center gap-2 rounded-lg bg-${p ?? 'success'}-soft px-3 py-2 text-sm text-${p ?? 'success'}-ink">
+  <CheckCircleIcon className="h-5 w-5" /> Changes saved successfully.
+</div>`,
+  BrandShades: () => `<div className="h-12 rounded-lg bg-brand-500" /> {/* brand-50 … brand-900 follow the theme */}`,
+  Gradient: () => `<div className="rounded-xl bg-gradient-to-r from-accent-soft to-accent-softer p-4 text-accent-strong ring-1 ring-accent-line">…</div>`,
+  RefreshingIcon: () => `<ArrowPathIcon className="h-5 w-5 animate-spin text-accent motion-reduce:animate-none" aria-hidden="true" />`,
 }
+
+/** Snippets that are not exports of @xex/ui, so need no import line and are not required of the library. */
+export const NON_COMPONENT_SNIPPETS = ['Range', 'FileInput', 'StatCard', 'WeightPill', 'Alert', 'BrandShades', 'Gradient', 'RefreshingIcon']
 
 const FROM: Record<string, string> = { FontPicker: '@xex/ui/font-picker' }
 
@@ -60,6 +83,7 @@ const FROM: Record<string, string> = { FontPicker: '@xex/ui/font-picker' }
 export function codeFor(name: string, props?: string): string | null {
   const snippet = SNIPPETS[name]
   if (!snippet) return null
+  if (NON_COMPONENT_SNIPPETS.includes(name)) return snippet(props)
   const used = new Set([name])
   // children used inside the example also need importing
   const text = snippet(props)

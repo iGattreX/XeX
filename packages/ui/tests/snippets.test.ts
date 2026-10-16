@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import * as ui from '../src'
-import { SNIPPETS, codeFor } from '../../../apps/docs/src/code/snippets'
+import { NON_COMPONENT_SNIPPETS, SNIPPETS, codeFor } from '../../../apps/docs/src/code/snippets'
 
 // The Controls page shows code for each control. A component the library exports without a snippet
 // there would be undiscoverable, so every exported component must have one.
@@ -15,7 +15,7 @@ describe('code snippets', () => {
   })
 
   it('does not describe components that do not exist', () => {
-    const extra = Object.keys(SNIPPETS).filter((n) => n !== 'FontPicker' && !components.includes(n))
+    const extra = Object.keys(SNIPPETS).filter((n) => n !== 'FontPicker' && !NON_COMPONENT_SNIPPETS.includes(n) && !components.includes(n))
     expect(extra).toEqual([])
   })
 
