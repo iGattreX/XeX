@@ -81,7 +81,7 @@ export function CodeDock({ target }: { target: Target | null }) {
   }, [])
 
   return (
-    <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 bg-canvas pt-2">
+    <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 -mb-5 -mt-4 bg-canvas pt-1">
       <button
         type="button"
         onClick={toggle}
