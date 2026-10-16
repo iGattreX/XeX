@@ -1,6 +1,6 @@
-import { useEffect, useRef, type ComponentType, type SVGProps } from 'react'
+import { useEffect, useRef, type ComponentType, type ReactNode, type SVGProps } from 'react'
 import clsx from 'clsx'
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useDialogFocus } from '../components/keyboard'
 
 export interface NavEntry {
@@ -26,13 +26,35 @@ interface SidebarProps {
    * sidebar always docked on wide screens.
    */
   onToggleCollapse?: () => void
+  /**
+   * Logo and name shown at the top. Pass your own element (an image, a link, anything), or a
+   * `<SidebarBrand name="Acme" mark="A" />` for the standard look. Defaults to the XeX brand.
+   */
+  brand?: ReactNode
+}
+
+interface SidebarBrandProps {
+  /** App name beside the mark. */
+  name?: string
+  /** What goes in the coloured square: a letter, an icon or an `<img>`. Defaults to the name's first letter. */
+  mark?: ReactNode
+}
+
+/** The standard sidebar brand: a theme-coloured square mark plus the app name. */
+export function SidebarBrand({ name = 'XeX', mark }: SidebarBrandProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">{mark ?? name.charAt(0)}</span>
+      <span className="truncate text-lg font-bold tracking-tight text-gray-900">{name}</span>
+    </div>
+  )
 }
 
 const iconButton =
   'rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400'
 
 /** App navigation: docked at lg+ (collapsible), slide-over drawer below, or when collapsed. */
-export function Sidebar({ items, active, onSelect, open, onClose, collapsed = false, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ items, active, onSelect, open, onClose, collapsed = false, onToggleCollapse, brand }: SidebarProps) {
   const asideRef = useRef<HTMLElement>(null)
   // Drawer mode only (open is never set while docked): focus in, trap Tab, restore on close.
   const trapTab = useDialogFocus(open, asideRef, {
@@ -77,10 +99,7 @@ export function Sidebar({ items, active, onSelect, open, onClose, collapsed = fa
         )}
       >
         <div className="flex items-center justify-between px-5 py-5">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">X</span>
-            <span className="text-lg font-bold tracking-tight text-gray-900">XeX</span>
-          </div>
+          <div className="min-w-0">{brand ?? <SidebarBrand />}</div>
           <div className="flex items-center gap-1">
             {onToggleCollapse && (
               <button
@@ -88,9 +107,9 @@ export function Sidebar({ items, active, onSelect, open, onClose, collapsed = fa
                 onClick={onToggleCollapse}
                 aria-label={collapsed ? 'Keep navigation open' : 'Collapse navigation'}
                 title={collapsed ? 'Keep navigation open' : 'Collapse navigation'}
-                className={clsx(iconButton, 'hidden lg:inline-flex')}
+                className={clsx(iconButton, 'hidden opacity-40 transition-opacity hover:opacity-100 focus-visible:opacity-100 lg:inline-flex')}
               >
-                {collapsed ? <ChevronDoubleRightIcon className="h-5 w-5" /> : <ChevronDoubleLeftIcon className="h-5 w-5" />}
+                {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
               </button>
             )}
             <button type="button" onClick={onClose} aria-label="Close navigation" className={clsx(iconButton, docked && 'lg:hidden')}>

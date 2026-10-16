@@ -19,6 +19,8 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
 export function Select({ label, options, placeholder, error, hint, className, id, disabled, ...rest }: SelectProps) {
   const autoId = useId()
   const selectId = id ?? autoId
+  const noteId = `${selectId}-note`
+  const note = error ?? hint
   return (
     <div className={className}>
       {label && (
@@ -31,6 +33,7 @@ export function Select({ label, options, placeholder, error, hint, className, id
           id={selectId}
           disabled={disabled}
           aria-invalid={!!error || undefined}
+          aria-describedby={note ? noteId : undefined}
           className={clsx(
             'w-full appearance-none rounded-lg border bg-surface px-3 py-2 pr-9 text-sm text-gray-900',
             'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400',
@@ -48,7 +51,11 @@ export function Select({ label, options, placeholder, error, hint, className, id
         </select>
         <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
       </div>
-      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : hint ? <p className="mt-1 text-xs text-gray-500">{hint}</p> : null}
+      {note && (
+        <p id={noteId} className={clsx('mt-1 text-xs', error ? 'text-danger-ink' : 'text-gray-500')}>
+          {note}
+        </p>
+      )}
     </div>
   )
 }
