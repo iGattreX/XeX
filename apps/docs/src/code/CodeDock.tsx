@@ -19,6 +19,24 @@ interface Spot {
   rect: DOMRect
 }
 
+/** The box of an element; for a `display: contents` wrapper, the box around its children. */
+function rectOf(el: HTMLElement): DOMRect {
+  const r = el.getBoundingClientRect()
+  if (r.width > 0 || r.height > 0 || !el.firstElementChild) return r
+  let left = Infinity
+  let top = Infinity
+  let right = -Infinity
+  let bottom = -Infinity
+  for (const child of Array.from(el.children)) {
+    const c = child.getBoundingClientRect()
+    left = Math.min(left, c.left)
+    top = Math.min(top, c.top)
+    right = Math.max(right, c.right)
+    bottom = Math.max(bottom, c.bottom)
+  }
+  return new DOMRect(left, top, right - left, bottom - top)
+}
+
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const FOCUSABLE = 'button, input, select, textarea, a[href], [role="switch"], [tabindex]'
 
@@ -64,7 +82,7 @@ export function useCodeDock() {
     if (!el || !el.isConnected) return
     // Already on screen (clear of the sticky header and this bar)? Then spotlight straight away.
     const inset = document.querySelector('section[aria-label^="Code for"]')?.getBoundingClientRect().bottom ?? 0
-    const r = el.getBoundingClientRect()
+    const r = rectOf(el)
     const tooTall = r.height > window.innerHeight - inset
     const onScreen = tooTall ? r.top < window.innerHeight && r.bottom > inset : r.top >= inset && r.bottom <= window.innerHeight
 
@@ -85,7 +103,7 @@ export function useCodeDock() {
         let still = 0
         const started = performance.now()
         const tick = () => {
-          const y = el.getBoundingClientRect().top
+          const y = rectOf(el).top
           still = y === last ? still + 1 : 0
           last = y
           if (still >= 4 || performance.now() - started > 1500) resolve()
@@ -94,7 +112,7 @@ export function useCodeDock() {
         requestAnimationFrame(tick)
       })
     }
-    setSpot({ rect: el.getBoundingClientRect() })
+    setSpot({ rect: rectOf(el) })
   }
 
   return {

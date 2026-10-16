@@ -65,6 +65,18 @@ export const SECTIONS: PageSection[] = [
   { id: 'more', label: 'More components' },
 ]
 
+/**
+ * Marks a demo for the code dock without adding a layout box (`display: contents`), for components
+ * that cannot take data attributes themselves.
+ */
+function Code({ name, props, label, children }: { name: string; props?: string; label?: string; children: ReactNode }) {
+  return (
+    <div className="contents" data-code={name} data-code-props={props} data-code-label={label}>
+      {children}
+    </div>
+  )
+}
+
 /** A named demo cell: what it is called, and the component that renders it. */
 function Tile({ name, component, code, codeProps, children }: { name: string; component: string; code?: string; codeProps?: string; children: ReactNode }) {
   return (
@@ -211,7 +223,7 @@ export function Playground() {
         <div className="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10" data-code="BrandShades">
           {SHADE_STEPS.map((s) => (
             <div key={s} className="text-center">
-              <div className="h-12 rounded-lg border border-gray-200" style={{ backgroundColor: `var(--brand-${s})` }} />
+              <div className="h-12 rounded-lg border border-gray-200" style={{ backgroundColor: `var(--brand-${s})` }} data-code="BrandShades" data-code-props={String(s)} />
               <p className="mt-1 text-[11px] font-medium text-gray-500">{s}</p>
               <p className="font-mono text-[10px] text-gray-500">{theme.shades[s]}</p>
             </div>
@@ -265,14 +277,14 @@ export function Playground() {
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             {BADGE_VARIANTS.map((v) => (
-              <span key={v} data-code="Badge" data-code-props={`variant="${v}"`} className="rounded-full">
+              <span key={v} data-code="Badge" data-code-label={v} data-code-props={`variant="${v}"`} className="rounded-full">
                 <Badge variant={v}>{v}</Badge>
               </span>
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
             {BADGE_VARIANTS.map((v) => (
-              <span key={v} data-code="Badge" data-code-props={`variant="${v}" dot`} className="rounded-full">
+              <span key={v} data-code="Badge" data-code-label={v} data-code-props={`variant="${v}" dot`} className="rounded-full">
                 <Badge variant={v} dot>{v}</Badge>
               </span>
             ))}
@@ -281,8 +293,8 @@ export function Playground() {
       </Section>
 
       <Section id="tabs" title="Tabs" description="Arrow keys / Home / End move between tabs; only the selected tab is a Tab stop. Disabled tabs are skipped.">
-        <div className="space-y-8" data-code="Tabs">
-          <div>
+        <div className="space-y-8">
+          <div data-code="Tabs" data-code-props="underline">
             <Label>Underline · icons and badge · one disabled</Label>
             <Tabs
               label="Project sections"
@@ -295,7 +307,7 @@ export function Playground() {
             />
           </div>
 
-          <div>
+          <div data-code="Tabs" data-code-props="pills">
             <Label>Pills · small</Label>
             <Tabs
               variant="pills"
@@ -310,7 +322,7 @@ export function Playground() {
           </div>
 
           <div className="grid gap-8 lg:grid-cols-2">
-            <div>
+            <div data-code="Tabs" data-code-props="manual">
               <Label>Manual activation · keep panels mounted</Label>
               <Tabs
                 activation="manual"
@@ -324,7 +336,7 @@ export function Playground() {
               <p className="mt-2 text-xs text-gray-500">Arrows move focus only; Enter or Space selects.</p>
             </div>
 
-            <div>
+            <div data-code="Tabs" data-code-props="controlled">
               <Label>Controlled · selected: {controlledTab}</Label>
               <Tabs
                 fullWidth
@@ -347,7 +359,7 @@ export function Playground() {
             </div>
           </div>
 
-          <div className="max-w-sm">
+          <div className="max-w-sm" data-code="Tabs" data-code-props="overflow">
             <Label>Overflow · scrolls instead of wrapping</Label>
             <Tabs
               label="Many tabs"
@@ -456,9 +468,11 @@ label="Notifications"`}>
               <p className="mt-1 text-[11px] text-gray-500">{s}</p>
             </div>
           ))}
-          <div className="ml-4 flex -space-x-2" data-code="Avatar" data-code-props='name="Ada Lovelace" size="md"'>
+          <div className="ml-4 flex -space-x-2">
             {PEOPLE.slice(0, 6).map((p) => (
-              <Avatar key={p.id} name={p.name} size="md" className="ring-2 ring-surface" />
+              <span key={p.id} className="inline-flex" data-code="Avatar" data-code-props={`name="${p.name}" size="md" className="ring-2 ring-surface"`}>
+                <Avatar name={p.name} size="md" className="ring-2 ring-surface" />
+              </span>
             ))}
           </div>
         </div>
@@ -467,7 +481,7 @@ label="Notifications"`}>
       <Section id="overlays" title="Modal & ConfirmDialog" description="Esc or backdrop click closes. Body scrolls independently.">
         <div className="flex flex-wrap items-center gap-3">
           {MODAL_SIZES.map((s) => (
-            <Button key={s} variant="secondary" data-code="Modal" data-code-props={`size="${s}"`} onClick={() => setModalSize(s)}>
+            <Button key={s} variant="secondary" data-code="Modal" data-code-props={`size="${s}"`} data-code-label={`Modal · ${s}`} onClick={() => setModalSize(s)}>
               Modal {s}
             </Button>
           ))}
@@ -518,22 +532,27 @@ label="Notifications"`}>
             { cls: 'stat-rose', label: 'Churned', value: '12' },
             { cls: 'stat-sky', label: 'Trials', value: '96' },
           ].map((s) => (
-            <div key={s.cls} className={clsx(s.cls, 'rounded-xl p-4')} data-code="StatCard" data-code-props={s.cls}>
+            <div key={s.cls} className={clsx(s.cls, 'rounded-xl p-4')} data-code="StatCard" data-code-props={s.cls} data-code-label={`${s.label}|${s.value}`}>
               <p className="text-xs font-semibold uppercase tracking-wide">{s.label}</p>
               <p className="mt-1 text-2xl font-bold">{s.value}</p>
             </div>
           ))}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-6 text-sm text-gray-700">
-          <span className="flex items-center gap-2" data-code="WeightPill">
-            Weights <span className="weight-pill">3</span> <span className="weight-pill">12</span> <span className="weight-pill">100</span>
+          <span className="flex items-center gap-2">
+            Weights{' '}
+            {[3, 12, 100].map((n) => (
+              <span key={n} className="weight-pill" data-code="WeightPill" data-code-label={String(n)}>
+                {n}
+              </span>
+            ))}
           </span>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          <div data-code="Alert" data-code-props="success" className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm text-success-ink">
+          <div data-code="Alert" data-code-props="success" data-code-label="Changes saved successfully." className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm text-success-ink">
             <CheckCircleIcon className="h-5 w-5" /> Changes saved successfully.
           </div>
-          <div data-code="Alert" data-code-props="warning" className="flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-ink">
+          <div data-code="Alert" data-code-props="warning" data-code-label="Your trial ends in 3 days." className="flex items-center gap-2 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-ink">
             <ExclamationCircleIcon className="h-5 w-5" /> Your trial ends in 3 days.
           </div>
         </div>
@@ -552,20 +571,27 @@ label="Notifications"`}>
           <Tile code="Spinner" name="Spinner" component="<Spinner />">
             <div className="flex flex-wrap items-end gap-5 text-accent">
               {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((sz) => (
-                <div key={sz} className="text-center">
+                <div key={sz} className="text-center" data-code="Spinner" data-code-props={`size="${sz}"`}>
                   <Spinner size={sz} />
                   <p className="mt-1 text-[11px] text-gray-500">{sz}</p>
                 </div>
               ))}
-              <Spinner size="lg" className="text-gray-500" />
-              <Spinner size="lg" className="text-success" />
+              <Code name="Spinner" props='size="lg" className="text-gray-500"'>
+                <Spinner size="lg" className="text-gray-500" />
+              </Code>
+              <Code name="Spinner" props='size="lg" className="text-success"'>
+                <Spinner size="lg" className="text-success" />
+              </Code>
             </div>
           </Tile>
 
           <Tile code="LoadingDots" name="Loading dots" component="<LoadingDots />">
             <div className="space-y-2 text-sm text-gray-700">
               <p className="flex items-center gap-2">
-                Fetching <LoadingDots className="text-accent" />
+                Fetching{' '}
+                <Code name="LoadingDots" props='className="text-accent"'>
+                  <LoadingDots className="text-accent" />
+                </Code>
               </p>
               <p className="flex items-center gap-2">
                 Total: <LoadingDots />
@@ -588,9 +614,25 @@ label="Notifications"`}>
 
           <Tile code="ProgressBar" name="Progress bar · determinate" component="<ProgressBar value />">
             <div className="space-y-3">
-              <ProgressBar label="Upload" value={progress} showLabel />
-              <ProgressBar label="Storage" value={72} tone="warning" showLabel size="sm" />
-              <ProgressBar label="Complete" value={100} tone="success" showLabel size="lg" />
+              <Code name="ProgressBar" props={`label="Upload"
+value={progress}
+showLabel`}>
+                <ProgressBar label="Upload" value={progress} showLabel />
+              </Code>
+              <Code name="ProgressBar" props={`label="Storage"
+value={72}
+tone="warning"
+showLabel
+size="sm"`}>
+                <ProgressBar label="Storage" value={72} tone="warning" showLabel size="sm" />
+              </Code>
+              <Code name="ProgressBar" props={`label="Complete"
+value={100}
+tone="success"
+showLabel
+size="lg"`}>
+                <ProgressBar label="Complete" value={100} tone="success" showLabel size="lg" />
+              </Code>
               <Button
                 data-code="Button"
                 data-code-props='size="xs" variant="secondary" icon={<ArrowPathIcon className="h-4 w-4" />} disabled={running}'
@@ -611,46 +653,79 @@ label="Notifications"`}>
 
           <Tile code="ProgressBar" name="Progress bar · indeterminate" component="<ProgressBar />">
             <div className="space-y-3">
-              <ProgressBar label="Loading" />
-              <ProgressBar label="Working" tone="success" size="sm" />
+              <Code name="ProgressBar" props='label="Loading"'>
+                <ProgressBar label="Loading" />
+              </Code>
+              <Code name="ProgressBar" props='label="Working" tone="success" size="sm"'>
+                <ProgressBar label="Working" tone="success" size="sm" />
+              </Code>
               <p className="text-xs text-gray-500">When the duration is unknown.</p>
             </div>
           </Tile>
 
           <Tile code="ProgressRing" name="Progress ring" component="<ProgressRing />">
             <div className="flex flex-wrap items-center gap-4">
-              <ProgressRing label="Upload" value={progress} size={56} />
-              <ProgressRing label="Disk" value={72} size={56} tone="warning" />
-              <ProgressRing label="Done" value={100} size={56} tone="success" />
-              <ProgressRing label="Loading" size={40} />
+              <Code name="ProgressRing" props='label="Upload" value={progress} size={56}'>
+                <ProgressRing label="Upload" value={progress} size={56} />
+              </Code>
+              <Code name="ProgressRing" props='label="Disk" value={72} size={56} tone="warning"'>
+                <ProgressRing label="Disk" value={72} size={56} tone="warning" />
+              </Code>
+              <Code name="ProgressRing" props='label="Done" value={100} size={56} tone="success"'>
+                <ProgressRing label="Done" value={100} size={56} tone="success" />
+              </Code>
+              <Code name="ProgressRing" props='label="Loading" size={40}'>
+                <ProgressRing label="Loading" size={40} />
+              </Code>
             </div>
           </Tile>
 
           <Tile code="SkeletonText" name="Skeleton · text and avatar" component="<Skeleton /> <SkeletonText />">
             <div className="flex items-start gap-3" aria-busy="true">
-              <Skeleton shape="circle" className="h-10 w-10 shrink-0" />
+              <Code name="Skeleton" props='shape="circle" className="h-10 w-10 shrink-0"'>
+                <Skeleton shape="circle" className="h-10 w-10 shrink-0" />
+              </Code>
               <div className="flex-1 space-y-3">
-                <Skeleton shape="text" className="h-4 w-1/2" />
-                <SkeletonText lines={3} />
+                <Code name="Skeleton" props='shape="text" className="h-4 w-1/2"'>
+                  <Skeleton shape="text" className="h-4 w-1/2" />
+                </Code>
+                <Code name="SkeletonText" props="lines={3}">
+                  <SkeletonText lines={3} />
+                </Code>
               </div>
             </div>
           </Tile>
 
           <Tile code="Skeleton" name="Skeleton · card" component="<Skeleton shape='rect' />">
             <div className="space-y-3" aria-busy="true">
-              <Skeleton className="h-24 w-full" />
-              <SkeletonText lines={2} />
+              <Code name="Skeleton" props='className="h-24 w-full"'>
+                <Skeleton className="h-24 w-full" />
+              </Code>
+              <Code name="SkeletonText" props="lines={2}">
+                <SkeletonText lines={2} />
+              </Code>
               <div className="flex gap-2">
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="h-8 w-20" />
+                <Code name="Skeleton" props='className="h-8 w-20"'>
+                  <Skeleton className="h-8 w-20" />
+                </Code>
+                <Code name="Skeleton" props='className="h-8 w-20"'>
+                  <Skeleton className="h-8 w-20" />
+                </Code>
               </div>
             </div>
           </Tile>
 
           <Tile code="LoadingOverlay" name="Loading overlay" component="<LoadingOverlay />">
             <div className="mb-3">
-              <Switch checked={overlayLoading} onChange={setOverlayLoading} label={overlayLoading ? 'Loading' : 'Loaded'} />
+              <Code name="Switch" props={`checked={isLoading}
+onChange={setIsLoading}
+label="Loading"`}>
+                <Switch checked={overlayLoading} onChange={setOverlayLoading} label="Loading" />
+              </Code>
             </div>
+            <Code name="LoadingOverlay" props={`loading={isLoading}
+label="Loading users…"
+className="rounded-lg"`}>
             <LoadingOverlay loading={overlayLoading} label="Loading users…" className="rounded-lg">
               <div className="rounded-lg border border-gray-200 p-3">
                 {['Ada Lovelace', 'Grace Hopper', 'Alan Turing'].map((n) => (
@@ -660,11 +735,16 @@ label="Notifications"`}>
                 ))}
               </div>
             </LoadingOverlay>
+            </Code>
           </Tile>
 
           <Tile code="FetchStatus" name="Fetch status" component="<FetchStatus />">
             <div className="space-y-2">
-              <FetchStatus state={fetchState} onRetry={simulateFetch} messages={{ success: 'Loaded 47 records' }} />
+              <Code name="FetchStatus" props={`state={state}
+onRetry={refetch}
+messages={{ success: 'Loaded 47 records' }}`}>
+                <FetchStatus state={fetchState} onRetry={simulateFetch} messages={{ success: 'Loaded 47 records' }} />
+              </Code>
               <Button data-code="Button" data-code-props='size="xs" variant="secondary" onClick={refetch}' data-code-label="Simulate fetch" size="xs" variant="secondary" onClick={simulateFetch} disabled={fetchState === 'loading'}>
                 Simulate fetch
               </Button>
@@ -675,7 +755,9 @@ label="Notifications"`}>
           <Tile code="FetchStatus" name="All fetch states" component="idle · loading · success · error">
             <div className="space-y-2">
               {(['idle', 'loading', 'success', 'error'] as const).map((st) => (
-                <FetchStatus key={st} state={st} onRetry={() => {}} />
+                <Code key={st} name="FetchStatus" props={`state="${st}" onRetry={refetch}`}>
+                  <FetchStatus state={st} onRetry={() => {}} />
+                </Code>
               ))}
             </div>
           </Tile>
