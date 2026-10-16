@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState, type FocusEvent, type PointerEvent } from 'react'
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, Square2StackIcon } from '@heroicons/react/24/outline'
+import clsx from 'clsx'
 import { codeFor } from './snippets'
 
 interface Target {
@@ -82,22 +83,29 @@ export function CodeDock({ target }: { target: Target | null }) {
 
   return (
     <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 -mb-5 -mt-4 bg-canvas pt-1">
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        className="flex w-full items-center gap-3 rounded text-[11px] font-medium leading-none text-gray-500 opacity-40 transition-opacity hover:opacity-100 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand-400"
-      >
-        <span className="h-px flex-1 bg-current" aria-hidden="true" />
-        <span className="flex items-center gap-1">
-          <CodeBracketIcon className="h-3.5 w-3.5" />
-          {open ? 'Hide code' : 'Expand for code'}
-          {open ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
-        </span>
-        <span className="h-px flex-1 bg-current" aria-hidden="true" />
-      </button>
+      <div className="relative">
+        {/* One button in both states (so focus survives a click); expanded, it sits on the card's top border */}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={open}
+          className={clsx(
+            'group rounded text-[11px] font-medium leading-none text-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+            open ? 'absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 bg-canvas px-2' : 'block w-full',
+          )}
+        >
+          <span className="flex items-center gap-3 opacity-40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            {!open && <span className="h-px flex-1 bg-current" aria-hidden="true" />}
+            <span className="flex items-center gap-1">
+              <CodeBracketIcon className="h-3.5 w-3.5" />
+              {open ? 'Hide code' : 'Expand for code'}
+              {open ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
+            </span>
+            {!open && <span className="h-px flex-1 bg-current" aria-hidden="true" />}
+          </span>
+        </button>
       {open && (
-        <div className="rounded-xl border border-accent-line bg-surface p-3 shadow-lg">
+        <div className="mt-1 rounded-xl border border-gray-300 bg-surface p-3 pt-4 shadow-lg">
           {code && target ? (
             <>
               <div className="mb-2 flex items-center justify-between gap-2">
@@ -121,6 +129,7 @@ export function CodeDock({ target }: { target: Target | null }) {
           )}
         </div>
       )}
+      </div>
     </section>
   )
 }
