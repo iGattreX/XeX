@@ -1,5 +1,16 @@
 # @xex/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- 1f87fa6: Add `Switch`, `Checkbox`, `Radio`, `RadioGroup` and `Textarea` components. `Sidebar` takes a `brand` prop (and a new `SidebarBrand` component) so apps can show their own logo and name. The sidebar collapse button is now a subtler single chevron.
+
+### Patch Changes
+
+- Updated dependencies [1f87fa6]
+  - @xex/tokens@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
