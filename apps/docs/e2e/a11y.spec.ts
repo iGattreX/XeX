@@ -40,7 +40,7 @@ for (const mode of ['light', 'dark'] as const) {
     })
   }
 
-  for (const route of ['components', 'typography', 'icons']) {
+  for (const route of ['typography', 'icons']) {
     test(`${route} · classic · ${mode}`, async ({ page }) => {
       await open(page, route, 'classic', mode)
       expect(await violations(page)).toEqual([])

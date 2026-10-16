@@ -15,6 +15,7 @@ import {
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import { SHADE_STEPS } from '@xex/tokens'
 import { FontPicker } from '@xex/ui/font-picker'
+import { CodeDock, useCodeDock } from '../code/CodeDock'
 import {
   Avatar,
   Badge,
@@ -61,12 +62,13 @@ export const SECTIONS: PageSection[] = [
   { id: 'feedback', label: 'Feedback & cards' },
   { id: 'loading', label: 'Loading & status' },
   { id: 'table', label: 'Data table' },
+  { id: 'more', label: 'More components' },
 ]
 
 /** A named demo cell: what it is called, and the component that renders it. */
-function Tile({ name, component, children }: { name: string; component: string; children: ReactNode }) {
+function Tile({ name, component, code, codeProps, children }: { name: string; component: string; code?: string; codeProps?: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-200 p-4">
+    <div className="rounded-xl border border-gray-200 p-4" data-code={code} data-code-props={codeProps}>
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
         <h3 className="text-sm font-semibold text-gray-900">{name}</h3>
         <code className="font-mono text-[11px] text-gray-500">{component}</code>
@@ -192,11 +194,15 @@ export function Playground() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleted, setDeleted] = useState(false)
 
+  const dock = useCodeDock()
+
   return (
-    <>
+    <div className="space-y-8" {...dock.handlers}>
       <Section id="theme" title="Theme" description={`Active: ${theme.name}. Choice persists in localStorage; shades are written to --brand-* on <html>.`}>
-        <ThemeSwitcher showLabels />
-        <div className="mt-5">
+        <div data-code="ThemeSwitcher">
+          <ThemeSwitcher showLabels />
+        </div>
+        <div className="mt-5" data-code="FontPicker">
           <Label>Font · {font.family}</Label>
           <FontPicker />
           <p className="mt-3 text-sm text-gray-600">The quick brown fox jumps over the lazy dog — 0123456789</p>
@@ -216,13 +222,13 @@ export function Playground() {
       </Section>
 
       <Section id="buttons" title="Buttons" description="5 variants × 4 sizes, icon slots, and a loading state.">
-        <div className="space-y-5">
+        <div className="space-y-5" data-code="Button">
           {BUTTON_SIZES.map((size) => (
             <div key={size}>
               <Label>{size}</Label>
               <div className="flex flex-wrap items-center gap-3">
                 {BUTTON_VARIANTS.map((v) => (
-                  <Button key={v} variant={v} size={size}>
+                  <Button key={v} variant={v} size={size} data-code="Button" data-code-props={`variant="${v}" size="${size}"`}>
                     {v}
                   </Button>
                 ))}
@@ -258,23 +264,23 @@ export function Playground() {
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             {BADGE_VARIANTS.map((v) => (
-              <Badge key={v} variant={v}>
-                {v}
-              </Badge>
+              <span key={v} data-code="Badge" data-code-props={`variant="${v}"`} className="rounded-full">
+                <Badge variant={v}>{v}</Badge>
+              </span>
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
             {BADGE_VARIANTS.map((v) => (
-              <Badge key={v} variant={v} dot>
-                {v}
-              </Badge>
+              <span key={v} data-code="Badge" data-code-props={`variant="${v}" dot`} className="rounded-full">
+                <Badge variant={v} dot>{v}</Badge>
+              </span>
             ))}
           </div>
         </div>
       </Section>
 
       <Section id="tabs" title="Tabs" description="Arrow keys / Home / End move between tabs; only the selected tab is a Tab stop. Disabled tabs are skipped.">
-        <div className="space-y-8">
+        <div className="space-y-8" data-code="Tabs">
           <div>
             <Label>Underline · icons and badge · one disabled</Label>
             <Tabs
@@ -350,15 +356,16 @@ export function Playground() {
         </div>
       </Section>
 
-      <Section id="forms" title="Form controls" description="Input, Select, plus native checkbox / radio / range / textarea / date / file styled to the theme.">
+      <Section id="forms" title="Form controls" description="Input, Textarea, Select, Checkbox, RadioGroup and Switch, plus native range, date and file inputs styled to the theme.">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <Input label="Full name" placeholder="Ada Lovelace" value={name} onChange={(e) => setName(e.target.value)} hint="At least 3 characters" error={submitted ? 'Too short' : undefined} />
-          <Input label="Search" placeholder="Search anything…" icon={<MagnifyingGlassIcon />} />
-          <Input label="Email" type="email" placeholder="you@company.com" />
-          <Input label="Disabled" disabled defaultValue="Read only value" />
-          <Input label="Password" type="password" placeholder="••••••••" />
-          <Input label="Number" type="number" defaultValue={3} />
+          <Input data-code="Input" label="Full name" placeholder="Ada Lovelace" value={name} onChange={(e) => setName(e.target.value)} hint="At least 3 characters" error={submitted ? 'Too short' : undefined} />
+          <Input data-code="Input" data-code-props='icon={<MagnifyingGlassIcon />}' label="Search" placeholder="Search anything…" icon={<MagnifyingGlassIcon />} />
+          <Input data-code="Input" data-code-props='type="email"' label="Email" type="email" placeholder="you@company.com" />
+          <Input data-code="Input" data-code-props='disabled' label="Disabled" disabled defaultValue="Read only value" />
+          <Input data-code="Input" data-code-props='type="password"' label="Password" type="password" placeholder="••••••••" />
+          <Input data-code="Input" data-code-props='type="number"' label="Number" type="number" defaultValue={3} />
           <Select
+            data-code="Select"
             label="Role"
             placeholder="Select a role…"
             value={role}
@@ -366,14 +373,15 @@ export function Playground() {
             options={ROLES.map((r) => ({ value: r.toLowerCase(), label: r }))}
             error={role === '' ? 'Pick a role to continue' : undefined}
           />
-          <Select label="Region" hint="Native select, custom chevron" defaultValue="eu" options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]} />
-          <Select label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
-          <Input label="Date" type="date" />
-          <Textarea className="md:col-span-2 xl:col-span-3" label="Notes (textarea)" placeholder="Write something…" />
+          <Select data-code="Select" label="Region" hint="Native select, custom chevron" defaultValue="eu" options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]} />
+          <Select data-code="Select" label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
+          <Input data-code="Input" data-code-props='type="date"' label="Date" type="date" />
+          <Textarea data-code="Textarea" className="md:col-span-2 xl:col-span-3" label="Notes (textarea)" placeholder="Write something…" />
           <div>
             <Label>Checkbox</Label>
-            <Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} label={<>I agree to the terms {agree && <CheckCircleIcon className="inline h-5 w-5 text-success" />}</>} />
+            <Checkbox data-code="Checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} label={<>I agree to the terms {agree && <CheckCircleIcon className="inline h-5 w-5 text-success" />}</>} />
           </div>
+          <div data-code="RadioGroup">
           <RadioGroup
             label="Radio group"
             direction="row"
@@ -381,7 +389,8 @@ export function Playground() {
             onChange={setPlan}
             options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }, { value: 'team', label: 'Team' }]}
           />
-          <div>
+          </div>
+          <div data-code="Switch">
             <Label>Switch</Label>
             <Switch checked={notify} onChange={setNotify} label={notify ? 'Notifications on' : 'Notifications off'} />
           </div>
@@ -403,7 +412,7 @@ export function Playground() {
       <Section id="avatars" title="Avatars" description="Inline hex backgrounds, independent of the brand theme.">
         <div className="flex flex-wrap items-end gap-4">
           {AVATAR_SIZES.map((s) => (
-            <div key={s} className="text-center">
+            <div key={s} className="text-center" data-code="Avatar" data-code-props={`name="Grace Hopper" size="${s}"`}>
               <Avatar name="Grace Hopper" size={s} />
               <p className="mt-1 text-[11px] text-gray-500">{s}</p>
             </div>
@@ -419,11 +428,11 @@ export function Playground() {
       <Section id="overlays" title="Modal & ConfirmDialog" description="Esc or backdrop click closes. Body scrolls independently.">
         <div className="flex flex-wrap items-center gap-3">
           {MODAL_SIZES.map((s) => (
-            <Button key={s} variant="secondary" onClick={() => setModalSize(s)}>
+            <Button key={s} variant="secondary" data-code="Modal" data-code-props={`size="${s}"`} onClick={() => setModalSize(s)}>
               Modal {s}
             </Button>
           ))}
-          <Button variant="danger" icon={<TrashIcon className="h-4 w-4" />} onClick={() => setConfirmOpen(true)}>
+          <Button variant="danger" data-code="ConfirmDialog" icon={<TrashIcon className="h-4 w-4" />} onClick={() => setConfirmOpen(true)}>
             Delete project…
           </Button>
           {deleted && <Badge variant="danger" dot>Deleted (demo)</Badge>}
@@ -501,7 +510,7 @@ export function Playground() {
         description="Every way the system shows that something is being fetched, is in progress, or has finished. Each tile is named, with the component that renders it."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Tile name="Spinner" component="<Spinner />">
+          <Tile code="Spinner" name="Spinner" component="<Spinner />">
             <div className="flex flex-wrap items-end gap-5 text-accent">
               {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((sz) => (
                 <div key={sz} className="text-center">
@@ -514,7 +523,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Loading dots" component="<LoadingDots />">
+          <Tile code="LoadingDots" name="Loading dots" component="<LoadingDots />">
             <div className="space-y-2 text-sm text-gray-700">
               <p className="flex items-center gap-2">
                 Fetching <LoadingDots className="text-accent" />
@@ -526,7 +535,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Button loading state" component="<Button loading />">
+          <Tile code="Button" codeProps="loading" name="Button loading state" component="<Button loading />">
             <div className="flex flex-wrap gap-2">
               <Button loading>Saving</Button>
               <Button loading variant="secondary">
@@ -538,7 +547,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Progress bar · determinate" component="<ProgressBar value />">
+          <Tile code="ProgressBar" name="Progress bar · determinate" component="<ProgressBar value />">
             <div className="space-y-3">
               <ProgressBar label="Upload" value={progress} showLabel />
               <ProgressBar label="Storage" value={72} tone="warning" showLabel size="sm" />
@@ -558,7 +567,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Progress bar · indeterminate" component="<ProgressBar />">
+          <Tile code="ProgressBar" name="Progress bar · indeterminate" component="<ProgressBar />">
             <div className="space-y-3">
               <ProgressBar label="Loading" />
               <ProgressBar label="Working" tone="success" size="sm" />
@@ -566,7 +575,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Progress ring" component="<ProgressRing />">
+          <Tile code="ProgressRing" name="Progress ring" component="<ProgressRing />">
             <div className="flex flex-wrap items-center gap-4">
               <ProgressRing label="Upload" value={progress} size={56} />
               <ProgressRing label="Disk" value={72} size={56} tone="warning" />
@@ -575,7 +584,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Skeleton · text and avatar" component="<Skeleton /> <SkeletonText />">
+          <Tile code="SkeletonText" name="Skeleton · text and avatar" component="<Skeleton /> <SkeletonText />">
             <div className="flex items-start gap-3" aria-busy="true">
               <Skeleton shape="circle" className="h-10 w-10 shrink-0" />
               <div className="flex-1 space-y-3">
@@ -585,7 +594,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Skeleton · card" component="<Skeleton shape='rect' />">
+          <Tile code="Skeleton" name="Skeleton · card" component="<Skeleton shape='rect' />">
             <div className="space-y-3" aria-busy="true">
               <Skeleton className="h-24 w-full" />
               <SkeletonText lines={2} />
@@ -596,7 +605,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="Loading overlay" component="<LoadingOverlay />">
+          <Tile code="LoadingOverlay" name="Loading overlay" component="<LoadingOverlay />">
             <div className="mb-3">
               <Switch checked={overlayLoading} onChange={setOverlayLoading} label={overlayLoading ? 'Loading' : 'Loaded'} />
             </div>
@@ -611,7 +620,7 @@ export function Playground() {
             </LoadingOverlay>
           </Tile>
 
-          <Tile name="Fetch status" component="<FetchStatus />">
+          <Tile code="FetchStatus" name="Fetch status" component="<FetchStatus />">
             <div className="space-y-2">
               <FetchStatus state={fetchState} onRetry={simulateFetch} messages={{ success: 'Loaded 47 records' }} />
               <Button size="xs" variant="secondary" onClick={simulateFetch} disabled={fetchState === 'loading'}>
@@ -621,7 +630,7 @@ export function Playground() {
             </div>
           </Tile>
 
-          <Tile name="All fetch states" component="idle · loading · success · error">
+          <Tile code="FetchStatus" name="All fetch states" component="idle · loading · success · error">
             <div className="space-y-2">
               {(['idle', 'loading', 'success', 'error'] as const).map((st) => (
                 <FetchStatus key={st} state={st} onRetry={() => {}} />
@@ -643,6 +652,7 @@ export function Playground() {
         title="Data table"
         description="Sorting, search, column filters, pagination (above and below) and a density toggle are built into every DataTable."
       >
+        <div data-code="DataTable">
         <DataTable
           label="Users"
           rows={PEOPLE}
@@ -650,7 +660,19 @@ export function Playground() {
           searchPlaceholder="Search users…"
           columns={USER_COLUMNS}
         />
+        </div>
       </Section>
-    </>
+      <Section id="more" title="Layout, theming & more" description="Components without an inline demo above. Choose one to see how to use it.">
+        <div className="flex flex-wrap gap-2">
+          {['Sidebar', 'SidebarBrand', 'Header', 'PageGuide', 'Section', 'ThemeProvider', 'PaginationBar', 'MultiSelect', 'SegmentedControl', 'Radio'].map((n) => (
+            <Button key={n} size="sm" variant="outline" data-code={n}>
+              {n}
+            </Button>
+          ))}
+        </div>
+      </Section>
+
+      <CodeDock target={dock.target} />
+    </div>
   )
 }

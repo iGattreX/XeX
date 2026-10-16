@@ -1,9 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type SVGProps } from 'react'
-import { AdjustmentsHorizontalIcon, DocumentTextIcon, PhotoIcon, Squares2X2Icon } from '@heroicons/react/24/outline'
+import { AdjustmentsHorizontalIcon, DocumentTextIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import type { PageSection } from '@xex/ui'
 import { Playground, SECTIONS } from './Playground'
 import { Typography, TYPE_SECTIONS } from './Typography'
-import { Components, COMPONENT_SECTIONS } from './Components'
 
 // The icon page pulls in every Heroicon, so it is split into its own chunk.
 const Icons = lazy(() => import('./Icons'))
@@ -35,15 +34,6 @@ export const PAGES: PageDef[] = [
     icon: AdjustmentsHorizontalIcon,
     component: Playground,
     sections: SECTIONS,
-  },
-  {
-    id: 'components',
-    label: 'Components',
-    title: 'Components',
-    subtitle: 'Every component the library exports, and how to import it.',
-    icon: Squares2X2Icon,
-    component: Components,
-    sections: COMPONENT_SECTIONS,
   },
   {
     id: 'typography',

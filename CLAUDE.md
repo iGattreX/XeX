@@ -2,7 +2,7 @@
 
 ## Components live in `@xex/ui`, never in an app
 - Every control must be a named export of `packages/ui/src` (via `components/index.ts` or `layout/`). Never define a control locally in the docs app or any consumer; if one is missing, add it to the library first.
-- The docs "Components" page lists every export automatically. If a component is not there, the library does not have it.
+- The docs Controls page shows the code for each control as you use it (the code dock). Every exported component needs an entry in `apps/docs/src/code/snippets.ts`; a unit test enforces this.
 - Naming: PascalCase, named for what it is (`Switch`, `Checkbox`, `RadioGroup`, `Textarea`). Variants are string props (`variant`, `size`).
 
 ## Building an app on XeX
