@@ -35,6 +35,10 @@ import {
   type DataTableColumn,
   type FetchState,
   Select,
+  Switch,
+  Checkbox,
+  RadioGroup,
+  Textarea,
   type AvatarSize,
   type BadgeVariant,
   type ButtonSize,
@@ -75,29 +79,6 @@ function Tile({ name, component, children }: { name: string; component: string; 
 const Label = ({ children }: { children: ReactNode }) => (
   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{children}</p>
 )
-
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="group flex items-center gap-3 text-sm text-gray-700 focus:outline-none"
-    >
-      <span
-        className={clsx(
-          // the button is what receives focus, so the ring is driven from it via `group`
-          'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-brand-400 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface',
-          checked ? 'bg-brand-600' : 'bg-gray-300',
-        )}
-      >
-        <span className={clsx('absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all', checked ? 'left-[22px]' : 'left-0.5')} />
-      </span>
-      {label}
-    </button>
-  )
-}
 
 const BUTTON_VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger', 'outline']
 const BUTTON_SIZES: ButtonSize[] = ['xs', 'sm', 'md', 'lg']
@@ -388,38 +369,21 @@ export function Playground() {
           <Select label="Region" hint="Native select, custom chevron" defaultValue="eu" options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]} />
           <Select label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
           <Input label="Date" type="date" />
-          <div className="md:col-span-2 xl:col-span-3">
-            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="notes">
-              Notes (textarea)
-            </label>
-            <textarea
-              id="notes"
-              rows={3}
-              placeholder="Write something…"
-              className="w-full rounded-lg border border-gray-300 bg-surface px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
-            />
-          </div>
+          <Textarea className="md:col-span-2 xl:col-span-3" label="Notes (textarea)" placeholder="Write something…" />
           <div>
             <Label>Checkbox</Label>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="h-4 w-4 rounded" />
-              I agree to the terms {agree && <CheckCircleIcon className="h-5 w-5 text-success" />}
-            </label>
+            <Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} label={<>I agree to the terms {agree && <CheckCircleIcon className="inline h-5 w-5 text-success" />}</>} />
           </div>
-          <div>
-            <Label>Radio</Label>
-            <div className="flex gap-4 text-sm text-gray-700">
-              {['free', 'pro', 'team'].map((p) => (
-                <label key={p} className="flex items-center gap-2 capitalize">
-                  <input type="radio" name="plan" value={p} checked={plan === p} onChange={() => setPlan(p)} className="h-4 w-4" />
-                  {p}
-                </label>
-              ))}
-            </div>
-          </div>
+          <RadioGroup
+            label="Radio group"
+            direction="row"
+            value={plan}
+            onChange={setPlan}
+            options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }, { value: 'team', label: 'Team' }]}
+          />
           <div>
             <Label>Switch</Label>
-            <Toggle checked={notify} onChange={setNotify} label={notify ? 'Notifications on' : 'Notifications off'} />
+            <Switch checked={notify} onChange={setNotify} label={notify ? 'Notifications on' : 'Notifications off'} />
           </div>
           <div>
             <Label>Range · {volume}</Label>
@@ -634,7 +598,7 @@ export function Playground() {
 
           <Tile name="Loading overlay" component="<LoadingOverlay />">
             <div className="mb-3">
-              <Toggle checked={overlayLoading} onChange={setOverlayLoading} label={overlayLoading ? 'Loading' : 'Loaded'} />
+              <Switch checked={overlayLoading} onChange={setOverlayLoading} label={overlayLoading ? 'Loading' : 'Loaded'} />
             </div>
             <LoadingOverlay loading={overlayLoading} label="Loading users…" className="rounded-lg">
               <div className="rounded-lg border border-gray-200 p-3">

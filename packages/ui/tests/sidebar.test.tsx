@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { HomeIcon } from '@heroicons/react/24/outline'
-import { Header, Sidebar, useSidebarCollapsed } from '../src'
+import { Header, Sidebar, SidebarBrand, useSidebarCollapsed } from '../src'
 
 const items = [
   { id: 'a', label: 'Alpha', icon: HomeIcon },
@@ -49,6 +49,28 @@ describe('Sidebar collapse', () => {
     render(<Sidebar items={items} active="a" onSelect={onSelect} open onClose={() => {}} collapsed />)
     await userEvent.click(screen.getByRole('link', { name: 'Beta' }))
     expect(onSelect).toHaveBeenCalledWith('b')
+  })
+})
+
+describe('Sidebar brand', () => {
+  const base = { items, active: 'a', onSelect: () => {}, open: true, onClose: () => {} }
+
+  it('shows the XeX brand by default', () => {
+    render(<Sidebar {...base} />)
+    expect(screen.getByText('XeX')).toBeInTheDocument()
+  })
+
+  it('SidebarBrand takes an app name and mark', () => {
+    render(<Sidebar {...base} brand={<SidebarBrand name="Acme" />} />)
+    expect(screen.getByText('Acme')).toBeInTheDocument()
+    expect(screen.getByText('A')).toBeInTheDocument() // mark defaults to the first letter
+    expect(screen.queryByText('XeX')).not.toBeInTheDocument()
+  })
+
+  it('accepts any element as the brand', () => {
+    render(<Sidebar {...base} brand={<img src="/logo.svg" alt="Acme logo" />} />)
+    expect(screen.getByRole('img', { name: 'Acme logo' })).toBeInTheDocument()
+    expect(screen.queryByText('XeX')).not.toBeInTheDocument()
   })
 })
 
