@@ -4,22 +4,34 @@
 // A snippet is a function of the props the demo control currently shows (`data-code-props`),
 // e.g. `variant="danger" size="lg"`, so the code matches what the user is looking at.
 
-type Snippet = (props?: string) => string
+type Snippet = (props?: string, label?: string) => string
 
 const attrs = (p?: string) => (p ? ` ${p}` : '')
 
+/**
+ * A self-closing element from props given one per line, as the demo shows them: kept on one line
+ * when short, otherwise one prop per line.
+ */
+function el(tag: string, props: string | string[]): string {
+  const list = (Array.isArray(props) ? props : props.split('\n')).filter(Boolean)
+  const inline = list.join(' ')
+  return inline.length <= 64 ? `<${tag} ${inline} />` : `<${tag}\n  ${list.join('\n  ')}\n/>`
+}
+
 export const SNIPPETS: Record<string, Snippet> = {
-  Button: (p) => `<Button${attrs(p ?? 'variant="primary" size="md"')}>Save</Button>`,
+  Button: (p, label) => `<Button${attrs(p ?? 'variant="primary" size="md"')}>${label ?? 'Save'}</Button>`,
   Badge: (p) => `<Badge${attrs(p ?? 'variant="success"')}>Active</Badge>`,
   Avatar: (p) => `<Avatar${attrs(p ?? 'name="Grace Hopper" size="md"')} />`,
-  Input: (p) => `<Input${attrs(p)} label="Full name" placeholder="Ada Lovelace" hint="At least 3 characters" />`,
-  Textarea: () => `<Textarea label="Notes" placeholder="Write something…" rows={3} />`,
-  Select: () => `<Select\n  label="Role"\n  value={role}\n  onChange={(e) => setRole(e.target.value)}\n  options={[{ value: 'admin', label: 'Admin' }, { value: 'member', label: 'Member' }]}\n/>`,
+  Input: (p) => el('Input', p ?? ['label="Full name"', 'placeholder="Ada Lovelace"', 'hint="At least 3 characters"']),
+  Textarea: (p) => el('Textarea', p ?? ['label="Notes"', 'placeholder="Write something…"', 'rows={3}']),
+  Select: (p) =>
+    el('Select', p ?? ['label="Role"', 'value={role}', 'onChange={(e) => setRole(e.target.value)}', "options={[{ value: 'admin', label: 'Admin' }, { value: 'member', label: 'Member' }]}"]),
   MultiSelect: () => `<MultiSelect\n  label="Status"\n  options={[{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }]}\n  value={selected}\n  onChange={setSelected}\n/>`,
-  Checkbox: () => `<Checkbox label="I agree to the terms" checked={agree} onChange={(e) => setAgree(e.target.checked)} />`,
+  Checkbox: (p) => el('Checkbox', p ?? ['label="I agree to the terms"', 'checked={agree}', 'onChange={(e) => setAgree(e.target.checked)}']),
   Radio: () => `<Radio name="plan" value="pro" label="Pro" checked={plan === 'pro'} onChange={() => setPlan('pro')} />`,
-  RadioGroup: () => `<RadioGroup\n  label="Plan"\n  value={plan}\n  onChange={setPlan}\n  options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }]}\n/>`,
-  Switch: () => `<Switch checked={notify} onChange={setNotify} label="Notifications" />`,
+  RadioGroup: (p) =>
+    el('RadioGroup', p ?? ['label="Plan"', 'value={plan}', 'onChange={setPlan}', "options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }]}"]),
+  Switch: (p) => el('Switch', p ?? ['checked={notify}', 'onChange={setNotify}', 'label="Notifications"']),
   SegmentedControl: () => `<SegmentedControl\n  label="Density"\n  value={density}\n  onChange={setDensity}\n  options={[{ value: 'comfortable', label: 'Comfortable' }, { value: 'compact', label: 'Compact' }]}\n/>`,
   Tabs: () => `<Tabs\n  label="Project sections"\n  items={[\n    { id: 'overview', label: 'Overview', content: <Overview /> },\n    { id: 'activity', label: 'Activity', badge: 12, content: <Activity /> },\n  ]}\n/>`,
   Modal: (p) => `<Modal open={open} onClose={() => setOpen(false)}${attrs(p)} title="Edit project" footer={<Button onClick={save}>Save</Button>}>\n  …\n</Modal>`,
@@ -80,16 +92,19 @@ export const NON_COMPONENT_SNIPPETS = ['Range', 'FileInput', 'StatCard', 'Weight
 const FROM: Record<string, string> = { FontPicker: '@xex/ui/font-picker' }
 
 /** The full text shown for a control: its import line, then the JSX. */
-export function codeFor(name: string, props?: string): string | null {
+export function codeFor(name: string, props?: string, label?: string): string | null {
   const snippet = SNIPPETS[name]
   if (!snippet) return null
-  if (NON_COMPONENT_SNIPPETS.includes(name)) return snippet(props)
+  if (NON_COMPONENT_SNIPPETS.includes(name)) return snippet(props, label)
   const used = new Set([name])
   // children used inside the example also need importing
-  const text = snippet(props)
+  const text = snippet(props, label)
   for (const other of Object.keys(SNIPPETS)) if (other !== name && new RegExp(`<${other}[\\s/>]`).test(text)) used.add(other)
   const groups = new Map<string, string[]>()
   for (const n of used) groups.set(FROM[n] ?? '@xex/ui', [...(groups.get(FROM[n] ?? '@xex/ui') ?? []), n])
   const imports = [...groups].map(([from, names]) => `import { ${names.sort().join(', ')} } from '${from}'`).join('\n')
-  return `${imports}\n\n${text}`
+  // Heroicons used in the example are imported from their own package
+  const icons = [...new Set(text.match(/\b\w+Icon\b/g) ?? [])].sort()
+  const iconImport = icons.length ? `\nimport { ${icons.join(', ')} } from '@heroicons/react/24/outline'` : ''
+  return `${imports}${iconImport}\n\n${text}`
 }

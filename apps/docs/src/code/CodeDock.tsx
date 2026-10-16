@@ -7,6 +7,8 @@ import { codeFor } from './snippets'
 interface Target {
   name: string
   props?: string
+  /** Text inside the control, when it matters to the code (e.g. a button's label). */
+  label?: string
   /** The demo element, so the dock can take the user back to it. */
   el?: HTMLElement
   /** Title of the page section the control is in, e.g. "Buttons". */
@@ -47,10 +49,11 @@ export function useCodeDock() {
     const next: Target = {
       name: el.dataset.code!,
       props: el.dataset.codeProps,
+      label: el.dataset.codeLabel,
       el,
       section: el.closest('section')?.querySelector('h2')?.textContent ?? undefined,
     }
-    setTarget((t) => (t && t.el === next.el && t.props === next.props ? t : next))
+    setTarget((t) => (t && t.el === next.el && t.props === next.props && t.label === next.label ? t : next))
   }
 
   const clearSpot = useCallback(() => setSpot(null), [])
@@ -166,7 +169,7 @@ export function CodeDock({ target, spot, onLocate, onSpotDone }: { target: Targe
     }
   }
 
-  const code = target ? codeFor(target.name, target.props) : null
+  const code = target ? codeFor(target.name, target.props, target.label) : null
 
   const copy = async () => {
     if (!code) return

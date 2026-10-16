@@ -229,7 +229,7 @@ export function Playground() {
               <Label>{size}</Label>
               <div className="flex flex-wrap items-center gap-3">
                 {BUTTON_VARIANTS.map((v) => (
-                  <Button key={v} variant={v} size={size} data-code="Button" data-code-props={`variant="${v}" size="${size}"`}>
+                  <Button key={v} variant={v} size={size} data-code="Button" data-code-props={`variant="${v}" size="${size}"`} data-code-label={v}>
                     {v}
                   </Button>
                 ))}
@@ -239,21 +239,21 @@ export function Playground() {
           <div>
             <Label>Icons, loading, disabled</Label>
             <div className="flex flex-wrap items-center gap-3">
-              <Button icon={<PlusIcon className="h-4 w-4" />}>New item</Button>
-              <Button variant="secondary" iconRight={<ArrowRightIcon className="h-4 w-4" />}>
+              <Button data-code="Button" data-code-props='icon={<PlusIcon className="h-4 w-4" />}' data-code-label="New item" icon={<PlusIcon className="h-4 w-4" />}>New item</Button>
+              <Button data-code="Button" data-code-props='variant="secondary" iconRight={<ArrowRightIcon className="h-4 w-4" />}' data-code-label="Continue" variant="secondary" iconRight={<ArrowRightIcon className="h-4 w-4" />}>
                 Continue
               </Button>
-              <Button variant="outline" icon={<ArrowDownTrayIcon className="h-4 w-4" />}>
+              <Button data-code="Button" data-code-props='variant="outline" icon={<ArrowDownTrayIcon className="h-4 w-4" />}' data-code-label="Export" variant="outline" icon={<ArrowDownTrayIcon className="h-4 w-4" />}>
                 Export
               </Button>
-              <Button variant="danger" icon={<TrashIcon className="h-4 w-4" />}>
+              <Button data-code="Button" data-code-props='variant="danger" icon={<TrashIcon className="h-4 w-4" />}' data-code-label="Remove" variant="danger" icon={<TrashIcon className="h-4 w-4" />}>
                 Remove
               </Button>
-              <Button loading={loading} onClick={demoLoad}>
+              <Button data-code="Button" data-code-props='loading={saving} onClick={save}' data-code-label="Save" loading={loading} onClick={demoLoad}>
                 {loading ? 'Saving…' : 'Click to load'}
               </Button>
-              <Button disabled>Disabled</Button>
-              <Button variant="secondary" disabled>
+              <Button data-code="Button" data-code-props='disabled' data-code-label="Disabled" disabled>Disabled</Button>
+              <Button data-code="Button" data-code-props='variant="secondary" disabled' data-code-label="Disabled" variant="secondary" disabled>
                 Disabled
               </Button>
             </div>
@@ -339,7 +339,7 @@ export function Playground() {
               />
               <div className="mt-2 flex gap-2">
                 {['a', 'b', 'c'].map((id) => (
-                  <Button key={id} size="xs" variant="secondary" onClick={() => setControlledTab(id)}>
+                  <Button key={id} data-code="Button" data-code-props={`size="xs" variant="secondary" onClick={() => setTab('${id}')}`} data-code-label={`Select ${id}`} size="xs" variant="secondary" onClick={() => setControlledTab(id)}>
                     Select {id}
                   </Button>
                 ))}
@@ -359,14 +359,35 @@ export function Playground() {
 
       <Section id="forms" title="Form controls" description="Input, Textarea, Select, Checkbox, RadioGroup and Switch, plus native range, date and file inputs styled to the theme.">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <Input data-code="Input" label="Full name" placeholder="Ada Lovelace" value={name} onChange={(e) => setName(e.target.value)} hint="At least 3 characters" error={submitted ? 'Too short' : undefined} />
-          <Input data-code="Input" data-code-props='icon={<MagnifyingGlassIcon />}' label="Search" placeholder="Search anything…" icon={<MagnifyingGlassIcon />} />
-          <Input data-code="Input" data-code-props='type="email"' label="Email" type="email" placeholder="you@company.com" />
-          <Input data-code="Input" data-code-props='disabled' label="Disabled" disabled defaultValue="Read only value" />
-          <Input data-code="Input" data-code-props='type="password"' label="Password" type="password" placeholder="••••••••" />
-          <Input data-code="Input" data-code-props='type="number"' label="Number" type="number" defaultValue={3} />
+          <Input data-code="Input" data-code-props={`label="Full name"
+placeholder="Ada Lovelace"
+value={name}
+onChange={(e) => setName(e.target.value)}
+hint="At least 3 characters"
+error={name.length < 3 ? 'Too short' : undefined}`} label="Full name" placeholder="Ada Lovelace" value={name} onChange={(e) => setName(e.target.value)} hint="At least 3 characters" error={submitted ? 'Too short' : undefined} />
+          <Input data-code="Input" data-code-props={`label="Search"
+placeholder="Search anything…"
+icon={<MagnifyingGlassIcon />}`} label="Search" placeholder="Search anything…" icon={<MagnifyingGlassIcon />} />
+          <Input data-code="Input" data-code-props={`label="Email"
+type="email"
+placeholder="you@company.com"`} label="Email" type="email" placeholder="you@company.com" />
+          <Input data-code="Input" data-code-props={`label="Disabled"
+disabled
+defaultValue="Read only value"`} label="Disabled" disabled defaultValue="Read only value" />
+          <Input data-code="Input" data-code-props={`label="Password"
+type="password"
+placeholder="••••••••"`} label="Password" type="password" placeholder="••••••••" />
+          <Input data-code="Input" data-code-props={`label="Number"
+type="number"
+defaultValue={3}`} label="Number" type="number" defaultValue={3} />
           <Select
             data-code="Select"
+            data-code-props={`label="Role"
+placeholder="Select a role…"
+value={role}
+onChange={(e) => setRole(e.target.value)}
+options={roles.map((r) => ({ value: r.toLowerCase(), label: r }))}
+error={role === '' ? 'Pick a role to continue' : undefined}`}
             label="Role"
             placeholder="Select a role…"
             value={role}
@@ -374,15 +395,29 @@ export function Playground() {
             options={ROLES.map((r) => ({ value: r.toLowerCase(), label: r }))}
             error={role === '' ? 'Pick a role to continue' : undefined}
           />
-          <Select data-code="Select" label="Region" hint="Native select, custom chevron" defaultValue="eu" options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]} />
-          <Select data-code="Select" label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
-          <Input data-code="Input" data-code-props='type="date"' label="Date" type="date" />
-          <Textarea data-code="Textarea" className="md:col-span-2 xl:col-span-3" label="Notes (textarea)" placeholder="Write something…" />
+          <Select data-code="Select" data-code-props={`label="Region"
+hint="Native select, custom chevron"
+defaultValue="eu"
+options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]}`} label="Region" hint="Native select, custom chevron" defaultValue="eu" options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe' }, { value: 'ap', label: 'Asia Pacific' }]} />
+          <Select data-code="Select" data-code-props={`label="Disabled select"
+disabled
+defaultValue="a"
+options={[{ value: 'a', label: 'Unavailable' }]}`} label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
+          <Input data-code="Input" data-code-props={`label="Date"
+type="date"`} label="Date" type="date" />
+          <Textarea data-code="Textarea" data-code-props={`label="Notes (textarea)"
+placeholder="Write something…"`} className="md:col-span-2 xl:col-span-3" label="Notes (textarea)" placeholder="Write something…" />
           <div>
             <Label>Checkbox</Label>
-            <Checkbox data-code="Checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} label={<>I agree to the terms {agree && <CheckCircleIcon className="inline h-5 w-5 text-success" />}</>} />
+            <Checkbox data-code="Checkbox" data-code-props={`label="I agree to the terms"
+checked={agree}
+onChange={(e) => setAgree(e.target.checked)}`} checked={agree} onChange={(e) => setAgree(e.target.checked)} label="I agree to the terms" />
           </div>
-          <div data-code="RadioGroup">
+          <div data-code="RadioGroup" data-code-props={`label="Radio group"
+direction="row"
+value={plan}
+onChange={setPlan}
+options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }, { value: 'team', label: 'Team' }]}`}>
           <RadioGroup
             label="Radio group"
             direction="row"
@@ -391,13 +426,15 @@ export function Playground() {
             options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }, { value: 'team', label: 'Team' }]}
           />
           </div>
-          <div data-code="Switch">
+          <div data-code="Switch" data-code-props={`checked={notify}
+onChange={setNotify}
+label="Notifications"`}>
             <Label>Switch</Label>
-            <Switch checked={notify} onChange={setNotify} label={notify ? 'Notifications on' : 'Notifications off'} />
+            <Switch checked={notify} onChange={setNotify} label="Notifications" />
           </div>
           <div>
             <Label>Range · {volume}</Label>
-            <input data-code="Range" type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full" />
+            <input data-code="Range" type="range" aria-label="Volume" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-brand-600" />
           </div>
           <div className="md:col-span-2 xl:col-span-3">
             <Label>File</Label>
@@ -539,11 +576,11 @@ export function Playground() {
 
           <Tile code="Button" codeProps="loading" name="Button loading state" component="<Button loading />">
             <div className="flex flex-wrap gap-2">
-              <Button loading>Saving</Button>
-              <Button loading variant="secondary">
+              <Button data-code="Button" data-code-props='loading' data-code-label="Saving" loading>Saving</Button>
+              <Button data-code="Button" data-code-props='variant="secondary" loading' data-code-label="Syncing" loading variant="secondary">
                 Syncing
               </Button>
-              <Button loading variant="outline" size="sm">
+              <Button data-code="Button" data-code-props='variant="outline" size="sm" loading' data-code-label="Exporting" loading variant="outline" size="sm">
                 Exporting
               </Button>
             </div>
@@ -555,6 +592,9 @@ export function Playground() {
               <ProgressBar label="Storage" value={72} tone="warning" showLabel size="sm" />
               <ProgressBar label="Complete" value={100} tone="success" showLabel size="lg" />
               <Button
+                data-code="Button"
+                data-code-props='size="xs" variant="secondary" icon={<ArrowPathIcon className="h-4 w-4" />} disabled={running}'
+                data-code-label="Run upload"
                 size="xs"
                 variant="secondary"
                 icon={<ArrowPathIcon className="h-4 w-4" />}
@@ -625,7 +665,7 @@ export function Playground() {
           <Tile code="FetchStatus" name="Fetch status" component="<FetchStatus />">
             <div className="space-y-2">
               <FetchStatus state={fetchState} onRetry={simulateFetch} messages={{ success: 'Loaded 47 records' }} />
-              <Button size="xs" variant="secondary" onClick={simulateFetch} disabled={fetchState === 'loading'}>
+              <Button data-code="Button" data-code-props='size="xs" variant="secondary" onClick={refetch}' data-code-label="Simulate fetch" size="xs" variant="secondary" onClick={simulateFetch} disabled={fetchState === 'loading'}>
                 Simulate fetch
               </Button>
               <p className="text-xs text-gray-500">Idle → loading → success or error (alternates).</p>

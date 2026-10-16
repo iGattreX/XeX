@@ -27,4 +27,18 @@ describe('code snippets', () => {
     expect(codeFor('FontPicker')).toContain(`from '@xex/ui/font-picker'`)
     expect(codeFor('Nope')).toBeNull()
   })
+
+  it('uses the label the control shows and imports the icons it uses', () => {
+    const code = codeFor('Button', 'variant="danger" icon={<TrashIcon className="h-4 w-4" />}', 'Remove')!
+    expect(code).toContain('>Remove</Button>')
+    expect(code).toContain(`import { TrashIcon } from '@heroicons/react/24/outline'`)
+    expect(codeFor('Button', 'disabled', 'Disabled')).toContain('<Button disabled>Disabled</Button>')
+  })
+
+  it('shows form controls with the props the demo uses, one per line when long', () => {
+    const email = codeFor('Input', ['label="Email"', 'type="email"'].join(String.fromCharCode(10)))!
+    expect(email).toContain('<Input label="Email" type="email" />')
+    const select = codeFor('Select', ['label="Region"', 'defaultValue="eu"', "options={[{ value: 'us', label: 'United States' }]}"].join(String.fromCharCode(10)))!
+    expect(select).toContain('<Select' + String.fromCharCode(10) + '  label="Region"')
+  })
 })

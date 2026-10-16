@@ -12,6 +12,8 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export function Input({ label, error, hint, icon, className, id, ...rest }: InputProps) {
   const autoId = useId()
   const inputId = id ?? autoId
+  const noteId = `${inputId}-note`
+  const note = error ?? hint
   return (
     <div className={className}>
       {label && (
@@ -28,6 +30,7 @@ export function Input({ label, error, hint, icon, className, id, ...rest }: Inpu
         <input
           id={inputId}
           aria-invalid={!!error || undefined}
+          aria-describedby={note ? noteId : undefined}
           className={clsx(
             'w-full rounded-lg border bg-surface px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400',
             'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400',
@@ -38,7 +41,11 @@ export function Input({ label, error, hint, icon, className, id, ...rest }: Inpu
           {...rest}
         />
       </div>
-      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : hint ? <p className="mt-1 text-xs text-gray-500">{hint}</p> : null}
+      {note && (
+        <p id={noteId} className={clsx('mt-1 text-xs', error ? 'text-danger-ink' : 'text-gray-500')}>
+          {note}
+        </p>
+      )}
     </div>
   )
 }

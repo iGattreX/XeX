@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { Checkbox, RadioGroup, Switch, Textarea } from '../src'
+import { Checkbox, Input, RadioGroup, Select, Switch, Textarea } from '../src'
 
 describe('Switch', () => {
   function Demo({ onChange = () => {} }: { onChange?: (v: boolean) => void }) {
@@ -75,5 +75,20 @@ describe('Textarea', () => {
     rerender(<Textarea label="Notes" error="Too short" />)
     expect(screen.getByRole('textbox', { name: 'Notes' })).toHaveAccessibleDescription('Too short')
     expect(screen.getByRole('textbox', { name: 'Notes' })).toBeInvalid()
+  })
+})
+
+describe('Input and Select hints', () => {
+  it('link their hint and error to the field so screen readers read them', () => {
+    const { rerender } = render(<Input label="Name" hint="At least 3 characters" />)
+    expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAccessibleDescription('At least 3 characters')
+    rerender(<Input label="Name" error="Too short" />)
+    expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAccessibleDescription('Too short')
+
+    const options = [{ value: 'a', label: 'A' }]
+    const view = render(<Select label="Role" options={options} hint="Pick one" />)
+    expect(screen.getByRole('combobox', { name: 'Role' })).toHaveAccessibleDescription('Pick one')
+    view.rerender(<Select label="Role" options={options} error="Required" />)
+    expect(screen.getByRole('combobox', { name: 'Role' })).toHaveAccessibleDescription('Required')
   })
 })
