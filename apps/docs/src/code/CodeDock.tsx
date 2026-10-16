@@ -81,20 +81,20 @@ export function CodeDock({ target }: { target: Target | null }) {
   }, [])
 
   return (
-    <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 -mb-4 bg-canvas pb-1">
+    <section aria-label="Code for the control you are using" style={{ top }} className="sticky z-20 bg-canvas pt-2">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="group flex w-full items-center gap-3 rounded py-1 text-xs font-medium text-accent hover:text-accent-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        className="flex w-full items-center gap-3 rounded text-[11px] font-medium leading-none text-gray-500 opacity-40 transition-opacity hover:opacity-100 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand-400"
       >
-        <span className="h-px flex-1 bg-brand-600 group-hover:bg-brand-800" aria-hidden="true" />
-        <span className="flex items-center gap-1.5">
-          <CodeBracketIcon className="h-4 w-4" />
+        <span className="h-px flex-1 bg-current" aria-hidden="true" />
+        <span className="flex items-center gap-1">
+          <CodeBracketIcon className="h-3.5 w-3.5" />
           {open ? 'Hide code' : 'Expand for code'}
-          {open ? <ChevronUpIcon className="h-3.5 w-3.5" /> : <ChevronDownIcon className="h-3.5 w-3.5" />}
+          {open ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
         </span>
-        <span className="h-px flex-1 bg-brand-600 group-hover:bg-brand-800" aria-hidden="true" />
+        <span className="h-px flex-1 bg-current" aria-hidden="true" />
       </button>
       {open && (
         <div className="rounded-xl border border-accent-line bg-surface p-3 shadow-lg">
