@@ -1,5 +1,16 @@
 # @xex/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- 70053cf: Add `ThemeSelect`, a dropdown that lists every theme with its primary colour and name, and `ModeToggle`, a separate light/dark button. `ThemeSwitcher` gains `variant="dropdown"` (a `ThemeSelect` plus an icon-only `ModeToggle`); the default swatches layout is unchanged.
+
+### Patch Changes
+
+- Updated dependencies [70053cf]
+  - @xex/tokens@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
