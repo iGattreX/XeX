@@ -83,3 +83,57 @@ describe('DataTable', () => {
     expect(names()[0]).toBe('User 1')
   })
 })
+
+describe('DataTable cards layout', () => {
+  const cardColumns: DataTableColumn<Row>[] = [
+    { id: 'name', header: 'Name', accessor: (r) => r.name },
+    { id: 'role', header: 'Role', accessor: (r) => r.role, cardLabel: 'Their role', filter: true },
+    { id: 'seats', header: 'Seats', accessor: (r) => r.seats, hideInCards: true },
+  ]
+  const cardNames = () => within(screen.getByRole('list', { name: 'People' })).getAllByRole('listitem').map((li) => li.querySelector('div')!.textContent)
+  const layout = () => screen.getAllByRole('radiogroup', { name: 'Row layout' })[0] // one above, one below
+
+  it('offers Comfortable, Compact and Cards in one control (a table until Cards is chosen)', async () => {
+    render(<DataTable label="People" rows={rows} columns={cardColumns} rowKey={(r) => r.id} />)
+    expect(within(layout()).getAllByRole('radio').map((r) => r.textContent)).toEqual(['Comfortable', 'Compact', 'Cards'])
+    expect(screen.getByRole('table')).toBeInTheDocument()
+    await userEvent.click(within(layout()).getByRole('radio', { name: 'Cards' }))
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(cardNames()).toEqual(['Ada', 'Bob', 'Cy', 'Dee', 'Eve'])
+    await userEvent.click(within(layout()).getByRole('radio', { name: 'Compact' }))
+    expect(screen.getByRole('table')).toBeInTheDocument()
+  })
+
+  it('shows the first column as the title and the rest as label/value pairs, honouring cardLabel and hideInCards', async () => {
+    render(<DataTable label="People" rows={rows} columns={cardColumns} rowKey={(r) => r.id} cards="always" />)
+    const first = within(screen.getByRole('list', { name: 'People' })).getAllByRole('listitem')[0]
+    expect(first).toHaveTextContent('Ada')
+    expect(within(first).getByText('Their role')).toBeInTheDocument()
+    expect(within(first).getByText('Admin')).toBeInTheDocument()
+    expect(within(first).queryByText('Seats')).not.toBeInTheDocument() // hidden in cards
+    expect(screen.queryByRole('radiogroup', { name: 'Row layout' })).not.toBeInTheDocument() // always: no toggle
+  })
+
+  it('sorts from a dropdown and a direction button, since there are no column headers', async () => {
+    render(<DataTable label="People" rows={rows} columns={cardColumns} rowKey={(r) => r.id} cards="always" />)
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Sort by' }), 'name')
+    expect(cardNames()).toEqual(['Ada', 'Bob', 'Cy', 'Dee', 'Eve'])
+    await userEvent.click(screen.getByRole('button', { name: /switch to descending/i }))
+    expect(cardNames()).toEqual(['Eve', 'Dee', 'Cy', 'Bob', 'Ada'])
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Sort by' }), '')
+    expect(screen.queryByRole('button', { name: /switch to/i })).not.toBeInTheDocument()
+  })
+
+  it('keeps searching and shows the empty message as a card', async () => {
+    render(<DataTable label="People" rows={rows} columns={cardColumns} rowKey={(r) => r.id} cards="always" />)
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search People' }), 'zzz')
+    expect(screen.getByText('No rows match your filters.')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Clear filters' }).length).toBeGreaterThan(0) // toolbar and empty card
+  })
+
+  it('cards="never" keeps the table and offers only the two densities', () => {
+    render(<DataTable label="People" rows={rows} columns={cardColumns} rowKey={(r) => r.id} cards="never" />)
+    expect(within(layout()).getAllByRole('radio').map((r) => r.textContent)).toEqual(['Comfortable', 'Compact'])
+    expect(screen.getByRole('table')).toBeInTheDocument()
+  })
+})
