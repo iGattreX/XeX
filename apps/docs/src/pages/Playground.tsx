@@ -37,6 +37,8 @@ import {
   type FetchState,
   Select,
   Switch,
+  ThemeSelect,
+  ModeToggle,
   Checkbox,
   RadioGroup,
   Textarea,
@@ -212,8 +214,17 @@ export function Playground() {
     <div className="space-y-8" {...dock.handlers}>
       <CodeDock target={dock.target} spot={dock.spot} onLocate={dock.locate} onSpotDone={dock.clearSpot} />
       <Section id="theme" title="Theme" description={`Active: ${theme.name}. Choice persists in localStorage; shades are written to --brand-* on <html>.`}>
-        <div data-code="ThemeSwitcher">
+        <div data-code="ThemeSwitcher" data-code-props="showLabels">
           <ThemeSwitcher showLabels />
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <div data-code="ThemeSelect">
+            <ThemeSelect align="left" />
+          </div>
+          <div data-code="ModeToggle">
+            <ModeToggle />
+          </div>
+          <p className="text-xs text-gray-500">The header uses these two: a dropdown of themes, and a separate light/dark button.</p>
         </div>
         <div className="mt-5" data-code="FontPicker">
           <Label>Font · {font.family}</Label>

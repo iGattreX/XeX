@@ -1,11 +1,33 @@
 import clsx from 'clsx'
-import { CheckIcon, MoonIcon, SunIcon } from '@heroicons/react/24/solid'
+import { CheckIcon } from '@heroicons/react/24/solid'
 import { useTheme } from './ThemeContext'
+import { ModeToggle } from './ModeToggle'
+import { ThemeSelect } from './ThemeSelect'
 import { radioGroupKeyDown } from '../components/keyboard'
 
-/** Swatch per theme + light/dark toggle. */
-export function ThemeSwitcher({ showLabels = false }: { showLabels?: boolean }) {
-  const { theme, themes, setThemeId, mode, toggleMode } = useTheme()
+interface ThemeSwitcherProps {
+  /** `swatches` (default): a row of colour swatches. `dropdown`: a compact select of names with their colours. */
+  variant?: 'swatches' | 'dropdown'
+  /** Names beside the swatches (swatches variant only). */
+  showLabels?: boolean
+}
+
+/**
+ * Theme picker plus a separate light/dark button. Use `ThemeSelect` and `ModeToggle` directly
+ * to place them independently.
+ */
+export function ThemeSwitcher({ variant = 'swatches', showLabels = false }: ThemeSwitcherProps) {
+  const { theme, themes, setThemeId } = useTheme()
+
+  if (variant === 'dropdown') {
+    return (
+      <div className="flex items-center gap-2">
+        <ThemeSelect />
+        <ModeToggle />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Color theme" onKeyDown={radioGroupKeyDown}>
@@ -37,15 +59,7 @@ export function ThemeSwitcher({ showLabels = false }: { showLabels?: boolean }) 
           )
         })}
       </div>
-      <button
-        type="button"
-        onClick={toggleMode}
-        aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
-        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-surface px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
-      >
-        {mode === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
-        {mode === 'dark' ? 'Light' : 'Dark'}
-      </button>
+      <ModeToggle showLabel />
     </div>
   )
 }
