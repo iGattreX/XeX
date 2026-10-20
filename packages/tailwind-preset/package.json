@@ -1,6 +1,6 @@
 {
   "name": "@xex/tailwind-preset",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Tailwind CSS preset for the XeX design system: theme-driven brand colour scale and fonts.",
   "license": "MIT",
   "keywords": [
