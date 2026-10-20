@@ -11,3 +11,5 @@ export { useSidebarCollapsed } from './layout/useSidebarCollapsed'
 // Theming
 export { ThemeProvider, useTheme, type ColorMode, type ThemeContextValue, type ThemeProviderProps } from './theme/ThemeContext'
 export { ThemeSwitcher } from './theme/ThemeSwitcher'
+export { ThemeSelect } from './theme/ThemeSelect'
+export { ModeToggle } from './theme/ModeToggle'

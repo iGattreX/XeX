@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { themes } from '@xex/tokens'
-import { ThemeProvider, ThemeSwitcher, useTheme } from '../src'
+import { ModeToggle, ThemeProvider, ThemeSelect, ThemeSwitcher, useTheme } from '../src'
 
 function Probe() {
   const { theme, mode, toggleMode, setThemeId } = useTheme()
@@ -96,5 +96,87 @@ describe('ThemeSwitcher', () => {
     await userEvent.keyboard('{ArrowRight}')
     expect(radios[1]).toHaveFocus()
     expect(radios[1]).toHaveAttribute('aria-checked', 'true')
+  })
+})
+
+describe('ThemeSelect', () => {
+  const setup = () =>
+    render(
+      <ThemeProvider>
+        <ThemeSelect />
+        <Probe />
+      </ThemeProvider>,
+    )
+  const trigger = () => screen.getByRole('combobox', { name: /Color theme/ })
+
+  it('lists every theme by name with its primary colour', async () => {
+    setup()
+    expect(trigger()).toHaveAccessibleName('Color theme: Classic')
+    await userEvent.click(trigger())
+    const options = screen.getAllByRole('option')
+    expect(options.map((o) => o.textContent)).toEqual(themes.map((t) => t.name))
+    for (const i of themes.keys()) {
+      const dot = options[i].querySelector<HTMLElement>('span[aria-hidden]')!
+      expect(dot.style.backgroundColor).not.toBe('')
+    }
+    expect(screen.getByRole('option', { name: 'Classic' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('picks with the mouse and closes', async () => {
+    setup()
+    await userEvent.click(trigger())
+    await userEvent.click(screen.getByRole('option', { name: 'Sunset' }))
+    expect(screen.getByTestId('state')).toHaveTextContent('sunset/')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    expect(trigger()).toHaveFocus()
+  })
+
+  it('works from the keyboard: arrows move, Enter picks, Escape closes', async () => {
+    setup()
+    trigger().focus()
+    await userEvent.keyboard('{ArrowDown}') // opens on the current theme
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+    expect(trigger()).toHaveAttribute('aria-activedescendant', screen.getAllByRole('option')[2].id)
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByTestId('state')).toHaveTextContent(themes[2].id)
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+
+    await userEvent.keyboard('{ArrowDown}{Escape}')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    expect(screen.getByTestId('state')).toHaveTextContent(themes[2].id) // Escape changes nothing
+  })
+
+  it('closes when the user presses elsewhere', async () => {
+    setup()
+    await userEvent.click(trigger())
+    await userEvent.click(document.body)
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+})
+
+describe('ModeToggle and the dropdown switcher', () => {
+  it('ModeToggle is its own button that flips the mode, icon-only by default', async () => {
+    render(
+      <ThemeProvider>
+        <ModeToggle />
+      </ThemeProvider>,
+    )
+    const btn = screen.getByRole('button', { name: 'Switch to dark mode' })
+    expect(btn).toHaveTextContent('')
+    await userEvent.click(btn)
+    expect(root().dataset.mode).toBe('dark')
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
+  })
+
+  it('ThemeSwitcher variant="dropdown" is a ThemeSelect plus a separate ModeToggle', () => {
+    render(
+      <ThemeProvider>
+        <ThemeSwitcher variant="dropdown" />
+      </ThemeProvider>,
+    )
+    expect(screen.getByRole('combobox', { name: /Color theme/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Switch to dark mode/ })).toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
   })
 })
