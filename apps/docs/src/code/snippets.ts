@@ -113,6 +113,7 @@ export const SNIPPETS: Record<string, Snippet> = {
       '  label="Users"',
       '  rows={people}',
       '  rowKey={(p) => p.id}',
+      '  // cards="auto" (default) adds a Cards layout and switches to it when narrow',
       '  searchPlaceholder="Search users…"',
       '  columns={[',
       "    { id: 'user', header: 'User', width: 3, accessor: (p) => p.name, cell: (p) => <UserCell person={p} /> },",

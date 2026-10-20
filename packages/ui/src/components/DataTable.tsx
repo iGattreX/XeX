@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { ArrowsRightLeftIcon, ArrowsUpDownIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Button } from './Button'
 import { Input } from './Input'
 import { PaginationBar } from './PaginationBar'
+import { Select } from './Select'
 import { SegmentedControl } from './SegmentedControl'
 import { MultiSelect } from './MultiSelect'
 
@@ -24,6 +25,10 @@ export interface DataTableColumn<T> {
   align?: 'left' | 'right'
   /** Default width as a relative weight (a column with 2 starts twice as wide as one with 1). Default: 1. */
   width?: number
+  /** Label for this column's value on a card. Defaults to `header`. */
+  cardLabel?: string
+  /** Leave this column out of the card layout. (The first column is always the card's title.) */
+  hideInCards?: boolean
 }
 
 export interface DataTableProps<T> {
@@ -39,7 +44,16 @@ export interface DataTableProps<T> {
   defaultPageSize?: number
   initialSort?: { columnId: string; direction: 'asc' | 'desc' }
   emptyMessage?: string
+  /**
+   * How rows are laid out. `auto` (default): a table, switching to cards when the table is narrow
+   * (a phone, or a narrow panel), with a Table/Cards toggle so the user can choose. `always` /
+   * `never` fix the layout and hide the toggle. In cards, the first column is the title and the
+   * others are label/value pairs.
+   */
+  cards?: 'auto' | 'always' | 'never'
 }
+
+type Layout = 'comfortable' | 'compact' | 'cards'
 
 type Sort = { columnId: string; direction: 'asc' | 'desc' } | null
 
@@ -48,6 +62,8 @@ type DragState = { i: number; startX: number; base: number[]; tableWidth: number
 /** Narrowest a column can be dragged to, and the table's scroll threshold per column. */
 const MIN_COL_PX = 64
 const MIN_TABLE_COL_PX = 96
+/** Below this width (px) an `auto` table shows cards. */
+const CARD_BREAKPOINT_PX = 560
 
 /**
  * Move the boundary between column `i` and column `i + 1` by `delta` (a fraction of the table
@@ -82,13 +98,32 @@ export function DataTable<T>({
   defaultPageSize = pageSizeOptions[0],
   initialSort,
   emptyMessage = 'No rows match your filters.',
+  cards = 'auto',
 }: DataTableProps<T>) {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<Record<string, string[]>>({})
   const [sort, setSort] = useState<Sort>(initialSort ?? null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
-  const [dense, setDense] = useState(false)
+
+  // Layout: Comfortable, Compact or Cards. Until the user picks one, `auto` shows cards when the
+  // table's own width (not the screen's) is narrow, and a comfortable table otherwise.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(0) // 0 = not measured yet: treated as wide
+  const [layout, setLayout] = useState<Layout | null>(null)
+  useLayoutEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const measure = () => setWidth(el.getBoundingClientRect().width)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  const narrow = width > 0 && width < CARD_BREAKPOINT_PX
+  const asCards = cards === 'always' || (cards === 'auto' && (layout ? layout === 'cards' : narrow))
+  const dense = layout === 'compact'
+  const cardColumns = width >= 960 ? 3 : width >= 640 ? 2 : 1
 
   // Column widths are fractions of the table width (summing to 1) so they survive container resizes.
   // null = the defaults from each column's `width` weight. Fixed table layout + <colgroup> means the
@@ -102,6 +137,8 @@ export function DataTable<T>({
   const [grow, setGrow] = useState(0)
   const [overflowing, setOverflowing] = useState(false)
   const [resizing, setResizing] = useState<number | null>(null)
+  // Is there more table to scroll to, either side? Drives the edge fades.
+  const [edges, setEdges] = useState({ left: false, right: false })
   const weights = columns.map((c) => c.width ?? 1)
   const weightSum = weights.reduce((a, b) => a + b, 0)
   const defaults = weights.map((w) => w / weightSum)
@@ -112,14 +149,26 @@ export function DataTable<T>({
   useEffect(() => {
     const wrapper = wrapperRef.current
     const table = tableRef.current
-    if (!wrapper || !table) return
-    const check = () => setOverflowing(table.offsetWidth > wrapper.clientWidth + 1)
+    if (asCards || !wrapper || !table) return
+    const check = () => {
+      setOverflowing(table.offsetWidth > wrapper.clientWidth + 1)
+      updateEdges()
+    }
     check()
     const ro = new ResizeObserver(check)
     ro.observe(wrapper)
     ro.observe(table)
     return () => ro.disconnect()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asCards])
+
+  const updateEdges = () => {
+    const w = wrapperRef.current
+    if (!w) return
+    const left = w.scrollLeft > 0
+    const right = w.scrollLeft + w.clientWidth < w.scrollWidth - 1
+    setEdges((e) => (e.left === left && e.right === right ? e : { left, right }))
+  }
 
   /** Widen / narrow the table by `delta` px, all of it taken by the last column. Never narrower than its container. */
   const growLast = (base: number[], tableWidth: number, startGrow: number, delta: number) => {
@@ -231,6 +280,7 @@ export function DataTable<T>({
   }
 
   const sortColumn = sort && columns.find((c) => c.id === sort.columnId)
+  const sortableColumns = columns.filter((c) => c.sortable !== false)
 
   const bar = (placement: 'above' | 'below') => (
     <PaginationBar
@@ -246,24 +296,28 @@ export function DataTable<T>({
         reset()
       }}
       right={
-        <SegmentedControl
-          label="Row density"
-          value={dense ? 'compact' : 'comfortable'}
-          onChange={(v) => setDense(v === 'compact')}
-          options={[
-            { value: 'comfortable', label: 'Comfortable' },
-            { value: 'compact', label: 'Compact' },
-          ]}
-        />
+        cards === 'always' ? undefined : (
+          <SegmentedControl<Layout>
+            label="Row layout"
+            value={asCards ? 'cards' : dense ? 'compact' : 'comfortable'}
+            onChange={setLayout}
+            options={[
+              { value: 'comfortable', label: 'Comfortable' },
+              { value: 'compact', label: 'Compact' },
+              ...(cards === 'auto' ? [{ value: 'cards' as const, label: 'Cards' }] : []),
+            ]}
+          />
+        )
       }
     />
   )
 
   const pad = dense ? 'px-4 py-1.5' : 'px-4 py-3'
+  const renderCell = (c: DataTableColumn<T>, row: T, denseCell: boolean) => (c.cell ? c.cell(row, { dense: denseCell }) : <span className="block truncate">{String(c.accessor(row))}</span>)
 
   return (
-    <div className="rounded-xl border border-gray-200">
-      {(searchable || filterColumns.length > 0 || sort || customized) && (
+    <div ref={rootRef} className="rounded-xl border border-gray-200">
+      {(searchable || filterColumns.length > 0 || sort || customized || asCards) && (
         <div className="flex flex-wrap items-end gap-3 rounded-t-xl border-b border-gray-100 p-3">
           {searchable && (
             <Input
@@ -296,7 +350,36 @@ export function DataTable<T>({
               Clear filters
             </Button>
           )}
-          {sortColumn && sort && (
+          {asCards && sortableColumns.length > 0 && (
+            <>
+              <Select
+                className="w-full sm:w-44"
+                aria-label="Sort by"
+                placeholder="Sort by…"
+                value={sort?.columnId ?? ''}
+                onChange={(e) => {
+                  const id = e.target.value
+                  setSort(id ? { columnId: id, direction: sort?.direction ?? 'asc' } : null)
+                  reset()
+                }}
+                options={sortableColumns.map((c) => ({ value: c.id, label: c.header }))}
+              />
+              {sort && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  aria-label={`Sorted ${sort.direction === 'asc' ? 'ascending' : 'descending'}; switch to ${sort.direction === 'asc' ? 'descending' : 'ascending'}`}
+                  onClick={() => {
+                    setSort({ ...sort, direction: sort.direction === 'asc' ? 'desc' : 'asc' })
+                    reset()
+                  }}
+                >
+                  {sort.direction === 'asc' ? 'A→Z' : 'Z→A'}
+                </Button>
+              )}
+            </>
+          )}
+          {!asCards && sortColumn && sort && (
             <Button
               variant="ghost"
               size="sm"
@@ -310,7 +393,7 @@ export function DataTable<T>({
               Sorted by {sortColumn.header} ({sort.direction === 'asc' ? 'A→Z' : 'Z→A'}) · Reset
             </Button>
           )}
-          {customized && (
+          {customized && !asCards && (
             <Button
               variant="ghost"
               size="sm"
@@ -329,7 +412,41 @@ export function DataTable<T>({
 
       {bar('above')}
 
-      <div ref={wrapperRef} className="overflow-x-auto">
+      {asCards ? (
+        <ul role="list" aria-label={label} className="grid gap-3 p-3" style={{ gridTemplateColumns: `repeat(${cardColumns}, minmax(0, 1fr))` }}>
+          {pageRows.map((row) => (
+            <li key={rowKey(row)} className="min-w-0 rounded-xl border border-gray-200 bg-surface p-4">
+              <div className="font-medium text-gray-900">{renderCell(columns[0], row, false)}</div>
+              {columns.slice(1).some((c) => !c.hideInCards) && (
+                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                  {columns
+                    .slice(1)
+                    .filter((c) => !c.hideInCards)
+                    .map((c) => (
+                      <div key={c.id} className="min-w-0">
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">{c.cardLabel ?? c.header}</dt>
+                        <dd className="mt-0.5 break-words text-gray-700">{renderCell(c, row, false)}</dd>
+                      </div>
+                    ))}
+                </dl>
+              )}
+            </li>
+          ))}
+          {pageRows.length === 0 && (
+            <li className="col-span-full py-10 text-center text-sm text-gray-500">
+              {emptyMessage}{' '}
+              {filterActive && (
+                <button type="button" onClick={clearAll} className="font-medium text-accent underline">
+                  Clear filters
+                </button>
+              )}
+            </li>
+          )}
+        </ul>
+      ) : (
+        <>
+      <div className="relative">
+      <div ref={wrapperRef} onScroll={updateEdges} className="overflow-x-auto">
         <table
           ref={tableRef}
           aria-label={label}
@@ -428,6 +545,11 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
+      {edges.left && <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/10 to-transparent" aria-hidden="true" />}
+      {edges.right && <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-black/10 to-transparent" aria-hidden="true" />}
+      </div>
+        </>
+      )}
 
       {bar('below')}
     </div>

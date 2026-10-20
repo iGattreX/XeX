@@ -56,7 +56,7 @@ export function PaginationBar({
     >
       <div>
         {totalPages > 1 && (
-          <nav aria-label={placement ? `Pagination, ${placement} table` : 'Pagination'} className="flex items-center gap-1">
+          <nav aria-label={placement ? `Pagination, ${placement} table` : 'Pagination'} className="flex flex-wrap items-center gap-1">
             <button type="button" className={navBtn} disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
               « Prev
             </button>
@@ -87,17 +87,17 @@ export function PaginationBar({
         )}
       </div>
 
-      <div className="ml-auto flex items-center gap-3 text-sm text-gray-500">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-sm text-gray-500">
         {right && (
           <>
             {right}
-            <span className="text-gray-300" aria-hidden="true">
+            <span className="hidden text-gray-300 sm:inline" aria-hidden="true">
               |
             </span>
           </>
         )}
         {pageSizeOptions && onPageSizeChange && (
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 whitespace-nowrap">
             Rows per page
             <select
               value={pageSize}
@@ -112,7 +112,7 @@ export function PaginationBar({
             </select>
           </label>
         )}
-        <span className="tabular-nums">
+        <span className="whitespace-nowrap tabular-nums">
           {from}–{to} of {total}
         </span>
       </div>
