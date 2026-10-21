@@ -1,11 +1,18 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import clsx from 'clsx'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import type { Theme } from '@xex/tokens'
 import { useTheme } from './ThemeContext'
 
-/** A theme's primary colour, as shown beside its name. */
-function Dot({ color }: { color: string }) {
-  return <span className="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/10" style={{ backgroundColor: color }} aria-hidden="true" />
+/** The theme's swatch, the same gradient the swatch picker uses, beside its name. */
+function Dot({ theme }: { theme: Theme }) {
+  return (
+    <span
+      className="h-4 w-4 shrink-0 rounded-full"
+      style={{ background: `linear-gradient(135deg, ${theme.shades[400]}, ${theme.shades[700]})` }}
+      aria-hidden="true"
+    />
+  )
 }
 
 /**
@@ -16,6 +23,7 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
   const { theme, themes, setThemeId } = useTheme()
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
+  const [side, setSide] = useState<'left' | 'right'>(align)
   const baseId = useId()
   const listId = `${baseId}-list`
   const optionId = (i: number) => `${baseId}-opt-${i}`
@@ -24,6 +32,14 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
   const list = useRef<HTMLUListElement>(null)
 
   const openList = () => {
+    // Open towards the side with room: the list is 14rem wide and must stay on screen (phones).
+    const r = trigger.current?.getBoundingClientRect()
+    if (r) {
+      const need = 224 + 8
+      const fitsRight = r.right - need >= 0 // list ends at the trigger's right edge and grows left
+      const fitsLeft = r.left + need <= window.innerWidth
+      setSide(align === 'right' ? (fitsRight || !fitsLeft ? 'right' : 'left') : fitsLeft || !fitsRight ? 'left' : 'right')
+    }
     setActive(Math.max(0, themes.findIndex((t) => t.id === theme.id)))
     setOpen(true)
   }
@@ -106,7 +122,7 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
         onKeyDown={onKeyDown}
         className="flex w-44 items-center gap-2 rounded-lg border border-gray-300 bg-surface px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
       >
-        <Dot color={theme.shades[600]} />
+        <Dot theme={theme} />
         <span className="flex-1 truncate text-left">{theme.name}</span>
         <ChevronUpDownIcon className="h-4 w-4 shrink-0 text-gray-500" />
       </button>
@@ -120,7 +136,7 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
           onMouseDown={(e) => e.preventDefault()}
           className={clsx(
             'absolute z-40 mt-2 max-h-[min(26rem,70vh)] w-56 overflow-auto rounded-xl border border-gray-200 bg-surface py-1 shadow-lg',
-            align === 'right' ? 'right-0' : 'left-0',
+            side === 'right' ? 'right-0' : 'left-0',
           )}
         >
           {themes.map((t, i) => (
@@ -133,7 +149,7 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
               onMouseMove={() => active !== i && setActive(i)}
               className={clsx('flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-gray-900', i === active && 'bg-gray-100')}
             >
-              <Dot color={t.shades[600]} />
+              <Dot theme={t} />
               <span className="flex-1">{t.name}</span>
               {t.id === theme.id && <CheckIcon className="h-4 w-4 text-accent" />}
             </li>

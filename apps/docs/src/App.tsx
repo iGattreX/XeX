@@ -56,7 +56,7 @@ export default function App() {
         }}
       />
       <div className="min-w-0 flex-1">
-        <Header title={page.title} subtitle={page.subtitle} actions={<ThemeSwitcher variant="dropdown" />} onMenu={() => setMenuOpen(true)} menuAlwaysVisible={navCollapsed} />
+        <Header title={page.title} subtitle={page.subtitle} actions={<ThemeSwitcher variant="dropdown" />} onMenu={() => setMenuOpen(true)} menuAlwaysVisible={navCollapsed} density="compact" />
         <div className="flex w-full items-start gap-8 p-4 sm:p-6">
           <main id="main-content" ref={mainRef} tabIndex={-1} className="min-w-0 flex-1 space-y-8 focus:outline-none">
             <Suspense fallback={<p className="py-10 text-center text-gray-500">Loading <LoadingDots /></p>}>
