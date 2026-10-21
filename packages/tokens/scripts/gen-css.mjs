@@ -83,21 +83,22 @@ ${tones.map((t) => t.light).join('\n')}
 
 html[data-mode='dark'] {
   color-scheme: dark;
-  --gray-50: #1a2138; --gray-100: #222a45; --gray-200: #2c3454; --gray-300: #3a4468; --gray-400: #7d88a8;
-  --gray-500: #8d97b3; --gray-600: #b4bcd0; --gray-700: #cbd2e1; --gray-800: #e5e7eb; --gray-900: #f3f4f6;
-  --canvas: #0b1020;
-  --surface: #141a2e;
+  /* Neutral greys (equal R, G, B): no blue cast. Brand colour only appears where a component asks for it. */
+  --gray-50: #1b1b1b; --gray-100: #252525; --gray-200: #303030; --gray-300: #424242; --gray-400: #808080;
+  --gray-500: #9a9a9a; --gray-600: #b8b8b8; --gray-700: #d0d0d0; --gray-800: #e6e6e6; --gray-900: #f4f4f4;
+  --canvas: #0b0b0b;
+  --surface: #161616;
 
   --accent: var(--brand-300);
   --accent-strong: var(--brand-200);
-  --accent-soft: color-mix(in srgb, var(--brand-500) 16%, #0b1020);
-  --accent-softer: color-mix(in srgb, var(--brand-500) 26%, #0b1020);
-  --accent-line: color-mix(in srgb, var(--brand-500) 40%, #0b1020);
+  --accent-soft: color-mix(in srgb, var(--brand-500) 16%, #0b0b0b);
+  --accent-softer: color-mix(in srgb, var(--brand-500) 26%, #0b0b0b);
+  --accent-line: color-mix(in srgb, var(--brand-500) 40%, #0b0b0b);
 
 ${tones.map((t) => t.dark).join('\n')}
 
-  --ring-track: #2a3352;
-  --overlay: rgb(20 26 46 / 0.65);
+  --ring-track: #333333;
+  --overlay: rgb(22 22 22 / 0.65);
 }
 
 /* ------------------------------------------------------------------ *
