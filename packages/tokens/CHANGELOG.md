@@ -1,5 +1,12 @@
 # @xex/tokens
 
+## 0.7.0
+
+### Minor Changes
+
+- fb1a55b: `Header` gets a `density` prop: `comfortable` (the default, unchanged) or `compact` (less padding, a smaller title and a one-line subtitle), and a faint shadow under it. The theme dropdown's options use the same gradient swatches as the swatch picker, and its list now opens toward the side with room so it is no longer clipped on phones.
+- 82eb697: `DataTable` rows can open a details view. Set `detail` to `true` for a read-only list of every column, or to a function that renders your own content (a form, say); `detailTitle` sets the heading. In a table the details open in a side panel beside the list; on cards, or when the table is narrow, they replace the list with a Back button. Focus moves to the details and returns to the row on close; Escape closes. Cards get a faint hover shadow. The table's toolbar and footer controls now use one text size (matching the layout toggle) and uniform heights, `PaginationBar` takes a `textSize`, and the filter dropdown's shadow is lighter. The edge fade on a scrolling table is removed.
+
 ## 0.6.0
 
 ### Minor Changes
