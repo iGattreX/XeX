@@ -1,6 +1,10 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Header, LoadingDots, PageGuide, Sidebar, ThemeSwitcher, useSidebarCollapsed } from '@xex/ui'
-import { PAGES } from './pages/registry'
+import { PAGES, type PageDef } from './pages/registry'
+
+const entry = ({ id, label, icon }: PageDef) => ({ id, label, icon })
+/** Top-level pages, each with the pages listed under it. */
+const NAV = PAGES.filter((p) => !p.parent).map((p) => ({ ...entry(p), children: PAGES.filter((c) => c.parent === p.id).map(entry) }))
 
 const pageFromHash = () => PAGES.find((p) => p.id === window.location.hash.replace(/^#\/?/, ''))?.id ?? PAGES[0].id
 
@@ -44,7 +48,7 @@ export default function App() {
         Skip to content
       </a>
       <Sidebar
-        items={PAGES.map(({ id, label, icon }) => ({ id, label, icon }))}
+        items={NAV}
         active={page.id}
         onSelect={goPage}
         open={menuOpen}

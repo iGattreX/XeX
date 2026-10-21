@@ -7,6 +7,8 @@ export interface NavEntry {
   id: string
   label: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
+  /** Pages shown indented beneath this one. */
+  children?: NavEntry[]
 }
 
 interface SidebarProps {
@@ -52,6 +54,24 @@ export function SidebarBrand({ name = 'XeX', mark }: SidebarBrandProps) {
 
 const iconButton =
   'rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400'
+
+function NavLink({ entry, active, onSelect, small = false }: { entry: NavEntry; active: string; onSelect: (id: string) => void; small?: boolean }) {
+  const Icon = entry.icon
+  return (
+    <a
+      href={`#/${entry.id}`}
+      aria-current={entry.id === active ? 'page' : undefined}
+      onClick={(e) => {
+        e.preventDefault()
+        onSelect(entry.id)
+      }}
+      className={entry.id === active ? 'nav-item-active' : 'nav-item-inactive'}
+    >
+      <Icon className={small ? 'h-4 w-4' : 'h-5 w-5'} />
+      {entry.label}
+    </a>
+  )
+}
 
 /** App navigation: docked at lg+ (collapsible), slide-over drawer below, or when collapsed. */
 export function Sidebar({ items, active, onSelect, open, onClose, collapsed = false, onToggleCollapse, brand }: SidebarProps) {
@@ -118,20 +138,17 @@ export function Sidebar({ items, active, onSelect, open, onClose, collapsed = fa
           </div>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4 pt-2">
-          {items.map(({ id, label, icon: Icon }) => (
-            <a
-              key={id}
-              href={`#/${id}`}
-              aria-current={id === active ? 'page' : undefined}
-              onClick={(e) => {
-                e.preventDefault()
-                onSelect(id)
-              }}
-              className={id === active ? 'nav-item-active' : 'nav-item-inactive'}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </a>
+          {items.map((item) => (
+            <div key={item.id}>
+              <NavLink entry={item} active={active} onSelect={onSelect} />
+              {item.children && item.children.length > 0 && (
+                <div className="ml-5 mt-1 space-y-1 border-l border-gray-200 pl-2">
+                  {item.children.map((child) => (
+                    <NavLink key={child.id} entry={child} active={active} onSelect={onSelect} small />
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
       </aside>

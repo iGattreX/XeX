@@ -134,3 +134,44 @@ test('the spotlight finds controls wrapped without a box of their own', async ({
   expect(box.width).toBeGreaterThan(20) // a real area around the skeleton, not an empty box
   expect(box.height).toBeGreaterThan(20)
 })
+
+test.describe('explore options page', () => {
+  const explorer = (page: import('@playwright/test').Page) => page.locator('#explorer')
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/#/options')
+    await page.waitForSelector('#explorer')
+  })
+
+  test('is listed under Controls in the navigation', async ({ page }) => {
+    const nav = page.getByRole('complementary', { name: 'Main navigation' })
+    await expect(nav.getByRole('link', { name: 'Explore options' })).toHaveAttribute('aria-current', 'page')
+    // it sits indented beneath Controls, after it and before Typography
+    const labels = await nav.getByRole('link').allTextContents()
+    expect(labels.map((l) => l.trim())).toEqual(['Controls', 'Explore options', 'Typography', 'Icons'])
+    await nav.getByRole('link', { name: 'Controls', exact: true }).click()
+    await expect(page).toHaveURL(/#\/controls/)
+  })
+
+  test('changing a control\'s options updates the preview and its code', async ({ page }) => {
+    await explorer(page).scrollIntoViewIfNeeded()
+    const code = explorer(page).locator('pre')
+    await expect(code).toContainText('<Button>Save changes</Button>')
+
+    await explorer(page).getByLabel('variant').selectOption('danger')
+    await explorer(page).getByRole('switch', { name: 'loading' }).click()
+    await expect(code).toContainText('<Button variant="danger" loading>Save changes</Button>')
+    await expect(explorer(page).getByTestId('explorer-preview').getByRole('button', { name: 'Save changes' })).toBeVisible()
+
+    await explorer(page).getByRole('button', { name: 'Reset options' }).click()
+    await expect(code).toContainText('<Button>Save changes</Button>')
+  })
+
+  test('a borderless Section can be tried out', async ({ page }) => {
+    await explorer(page).getByLabel('Control').selectOption('Section')
+    const preview = explorer(page).getByTestId('explorer-preview')
+    await expect(preview.locator('section[data-appearance="card"]')).toHaveCount(1)
+    await explorer(page).getByLabel('appearance').selectOption('plain')
+    await expect(preview.locator('section[data-appearance="plain"]')).toHaveCount(1)
+    await expect(explorer(page).locator('pre')).toContainText('appearance="plain"')
+  })
+})
