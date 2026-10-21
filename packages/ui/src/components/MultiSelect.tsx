@@ -83,7 +83,7 @@ export function MultiSelect({ options, value, onChange, label, className }: Mult
           onMouseDown={(e) => {
             if (!(e.target instanceof HTMLInputElement)) e.preventDefault()
           }}
-          className="absolute left-0 z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-xl border border-gray-200 bg-surface p-1 shadow-xl"
+          className="absolute left-0 z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-xl border border-gray-200 bg-surface p-1 shadow-sm"
         >
           {options.map((o) => (
             <label key={o.value} className="flex cursor-default items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-gray-800 hover:bg-gray-50">

@@ -121,6 +121,7 @@ export const SNIPPETS: Record<string, Snippet> = {
       "    { id: 'status', header: 'Status', width: 2, accessor: (p) => p.status.label, filter: true, filterLabel: 'All statuses' },",
       "    { id: 'seats', header: 'Seats', width: 1, accessor: (p) => p.seats },",
       '  ]}',
+      '  detail={(p) => <PersonForm person={p} />} // opens beside the list; on cards it replaces it, with Back',
       '/>',
     ].join('\n'),
   PaginationBar: () => `<PaginationBar\n  page={page}\n  totalPages={totalPages}\n  total={total}\n  pageSize={pageSize}\n  onPageChange={setPage}\n  onPageSizeChange={setPageSize}\n/>`,

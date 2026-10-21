@@ -16,6 +16,8 @@ export interface PaginationBarProps {
   placement?: 'above' | 'below'
   /** Extra controls on the right (e.g. a density toggle), divided by a "|". */
   right?: ReactNode
+  /** Text size of the controls. `xs` matches compact toolbars (and the SegmentedControl). Default: sm. */
+  textSize?: 'sm' | 'xs'
 }
 
 /** 1 … 4 5 [6] 7 8 … 20 — null entries are ellipses. */
@@ -31,7 +33,7 @@ export function pageWindow(page: number, totalPages: number): (number | null)[] 
   return out
 }
 
-const navBtn = 'rounded-md px-2.5 py-1 text-sm text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-40 disabled:hover:bg-transparent'
+const navBtn = 'rounded-md px-2.5 py-1 text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-40 disabled:hover:bg-transparent'
 
 export function PaginationBar({
   page,
@@ -43,7 +45,11 @@ export function PaginationBar({
   onPageSizeChange,
   right,
   placement,
+  textSize = 'sm',
 }: PaginationBarProps) {
+  const text = textSize === 'xs' ? 'text-xs' : 'text-sm'
+  // xs bars use one fixed control height (28px, the SegmentedControl's), so everything in the bar lines up
+  const h = textSize === 'xs' && 'h-7 py-0'
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1
   const to = Math.min(page * pageSize, total)
 
@@ -57,7 +63,7 @@ export function PaginationBar({
       <div>
         {totalPages > 1 && (
           <nav aria-label={placement ? `Pagination, ${placement} table` : 'Pagination'} className="flex flex-wrap items-center gap-1">
-            <button type="button" className={navBtn} disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+            <button type="button" className={clsx(navBtn, text, h)} disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
               « Prev
             </button>
             {pageWindow(page, totalPages).map((p, i) =>
@@ -72,7 +78,9 @@ export function PaginationBar({
                   aria-current={p === page ? 'page' : undefined}
                   onClick={() => onPageChange(p)}
                   className={clsx(
-                    'min-w-[2rem] rounded-md px-2 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+                    'min-w-[2rem] rounded-md px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+                    text,
+                    h,
                     p === page ? 'bg-brand-600 font-semibold text-white' : 'text-gray-600 hover:bg-gray-100',
                   )}
                 >
@@ -80,14 +88,14 @@ export function PaginationBar({
                 </button>
               ),
             )}
-            <button type="button" className={navBtn} disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
+            <button type="button" className={clsx(navBtn, text, h)} disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
               Next »
             </button>
           </nav>
         )}
       </div>
 
-      <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-sm text-gray-500">
+      <div className={clsx('ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-gray-500', text)}>
         {right && (
           <>
             {right}
@@ -102,7 +110,7 @@ export function PaginationBar({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="rounded-md border border-gray-300 bg-surface px-1.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+              className={clsx('rounded-md border border-gray-300 bg-surface px-1.5 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400', text, h)}
             >
               {pageSizeOptions.map((n) => (
                 <option key={n} value={n}>

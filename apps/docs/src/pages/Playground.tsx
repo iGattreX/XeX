@@ -37,6 +37,7 @@ import {
   type FetchState,
   Select,
   Switch,
+  SegmentedControl,
   ThemeSelect,
   ModeToggle,
   Checkbox,
@@ -207,6 +208,10 @@ export function Playground() {
   const [modalSize, setModalSize] = useState<ModalSize | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleted, setDeleted] = useState(false)
+
+  // Data table: what clicking a row does.
+  type DetailMode = 'form' | 'readonly' | 'none'
+  const [detailMode, setDetailMode] = useState<DetailMode>('form')
 
   const dock = useCodeDock()
 
@@ -788,13 +793,48 @@ messages={{ success: 'Loaded 47 records' }}`}>
         description="Sorting, search, column filters, pagination (above and below) and a density toggle are built into every DataTable."
       >
         <div data-code="DataTable">
-        <DataTable
-          label="Users"
-          rows={PEOPLE}
-          rowKey={(p) => p.id}
-          searchPlaceholder="Search users…"
-          columns={USER_COLUMNS}
-        />
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <span className="text-sm text-gray-600">Clicking a row</span>
+            <SegmentedControl<DetailMode>
+              label="What clicking a row does"
+              value={detailMode}
+              onChange={setDetailMode}
+              options={[
+                { value: 'form', label: 'Opens a form' },
+                { value: 'readonly', label: 'Shows read-only details' },
+                { value: 'none', label: 'Does nothing' },
+              ]}
+            />
+          </div>
+          <DataTable
+            label="Users"
+            rows={PEOPLE}
+            rowKey={(p) => p.id}
+            searchPlaceholder="Search users…"
+            columns={USER_COLUMNS}
+            detail={
+              detailMode === 'none'
+                ? undefined
+                : detailMode === 'readonly'
+                  ? true
+                  : (p) => (
+                      <form key={p.id} className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+                        <Input label="Name" defaultValue={p.name} />
+                        <Select label="Role" defaultValue={p.role.toLowerCase()} options={ROLES.map((r) => ({ value: r.toLowerCase(), label: r }))} />
+                        <Input label="Seats" type="number" defaultValue={p.seats} />
+                        <p className="flex items-center gap-2 text-sm text-gray-600">
+                          Status
+                          <Badge variant={p.status.variant} dot>
+                            {p.status.label}
+                          </Badge>
+                        </p>
+                        <Button type="submit" size="sm">
+                          Save changes
+                        </Button>
+                      </form>
+                    )
+            }
+          />
         </div>
       </Section>
       <Section id="more" title="Layout, theming & more" description="Components without an inline demo above. Choose one to see how to use it.">

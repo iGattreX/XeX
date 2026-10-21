@@ -137,3 +137,76 @@ describe('DataTable cards layout', () => {
     expect(screen.getByRole('table')).toBeInTheDocument()
   })
 })
+
+describe('DataTable row details', () => {
+  const open = (name: string) => userEvent.click(screen.getByRole('button', { name }))
+  const panel = (name: string) => screen.getByRole('region', { name })
+
+  it('rows do nothing when no detail is given', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} />)
+    expect(document.querySelector('[data-open-trigger]')).toBeNull()
+    await userEvent.click(screen.getByText('Ada'))
+    expect(screen.queryByRole('region')).not.toBeInTheDocument()
+  })
+
+  it('opens a read-only list of every column in a panel beside the table, and moves focus to it', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} detail />)
+    await open('Ada')
+    const p = panel('Ada')
+    expect(within(p).getAllByRole('term').map((t) => t.textContent)).toEqual(['Name', 'Role', 'Seats'])
+    expect(within(p).queryByRole('textbox')).not.toBeInTheDocument() // read-only
+    expect(screen.getByRole('table')).toBeInTheDocument() // the list stays
+    expect(within(p).getByRole('heading', { name: 'Ada' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Ada', expanded: true })).toBeInTheDocument()
+  })
+
+  it('opens when the row is clicked, not only its button, and switching rows swaps the panel', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} detail />)
+    await userEvent.click(screen.getByText('Bob')) // the row's text, not the button
+    expect(panel('Bob')).toBeInTheDocument()
+    await open('Cy')
+    expect(panel('Cy')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Bob' })).not.toBeInTheDocument()
+  })
+
+  it('closes with the X or Escape and returns focus to the row that was opened', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} detail />)
+    await open('Dee')
+    await userEvent.click(screen.getByRole('button', { name: 'Close details for Dee' }))
+    expect(screen.queryByRole('region')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dee' })).toHaveFocus()
+
+    await open('Eve')
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('region')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Eve' })).toHaveFocus()
+  })
+
+  it('renders your own content (a form) when detail is a function', async () => {
+    render(
+      <DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} detail={(r) => <input aria-label="Edit name" defaultValue={r.name} />} detailTitle={(r) => `Edit ${r.name}`} />,
+    )
+    await open('Ada')
+    expect(within(panel('Edit Ada')).getByRole('textbox', { name: 'Edit name' })).toHaveValue('Ada')
+  })
+
+  it('on cards the details replace the list, with a Back button that restores it', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} cards="always" detail />)
+    await open('Bob')
+    expect(screen.queryByRole('list', { name: 'People' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: 'Search People' })).not.toBeInTheDocument() // toolbar hidden too
+    expect(within(panel('Bob')).getByRole('heading', { name: 'Bob' })).toHaveFocus()
+    await userEvent.click(screen.getByRole('button', { name: 'Back to People' }))
+    expect(screen.getByRole('list', { name: 'People' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Bob' })).toHaveFocus()
+  })
+
+  it('keeps the search while details are open and after going back', async () => {
+    render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} cards="always" detail />)
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search People' }), 'Ev') // only Eve
+    await open('Eve')
+    await userEvent.click(screen.getByRole('button', { name: 'Back to People' }))
+    expect(screen.getByRole('textbox', { name: 'Search People' })).toHaveValue('Ev')
+    expect(within(screen.getByRole('list', { name: 'People' })).getAllByRole('listitem')).toHaveLength(1)
+  })
+})
