@@ -138,7 +138,7 @@ export const SNIPPETS: Record<string, Snippet> = {
   ModeToggle: () => `<ModeToggle />`,
   Sidebar: () => `<Sidebar\n  items={[{ id: 'home', label: 'Home', icon: HomeIcon }]}\n  active={page}\n  onSelect={setPage}\n  open={drawerOpen}\n  onClose={() => setDrawerOpen(false)}\n  brand={<SidebarBrand name="Acme" />}\n/>`,
   SidebarBrand: () => `<SidebarBrand name="Acme" mark={<BoltIcon className="h-5 w-5" />} />`,
-  Header: () => `<Header title="Dashboard" subtitle="Everything at a glance" onMenu={() => setDrawerOpen(true)} actions={<ThemeSwitcher variant="dropdown" />} />`,
+  Header: () => `<Header title="Dashboard" subtitle="Everything at a glance" density="compact" onMenu={() => setDrawerOpen(true)} actions={<ThemeSwitcher variant="dropdown" />} />`,
   PageGuide: () => `<PageGuide sections={[{ id: 'intro', label: 'Intro' }, { id: 'usage', label: 'Usage' }]} />`,
   Section: () => `<Section id="intro" title="Intro" description="Shown in the On this page guide">\n  …\n</Section>`,
   FontPicker: () => `<FontPicker />`,

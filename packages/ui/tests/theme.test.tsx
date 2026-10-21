@@ -109,7 +109,7 @@ describe('ThemeSelect', () => {
     )
   const trigger = () => screen.getByRole('combobox', { name: /Color theme/ })
 
-  it('lists every theme by name with its primary colour', async () => {
+  it('lists every theme by name with its gradient swatch', async () => {
     setup()
     expect(trigger()).toHaveAccessibleName('Color theme: Classic')
     await userEvent.click(trigger())
@@ -117,7 +117,7 @@ describe('ThemeSelect', () => {
     expect(options.map((o) => o.textContent)).toEqual(themes.map((t) => t.name))
     for (const i of themes.keys()) {
       const dot = options[i].querySelector<HTMLElement>('span[aria-hidden]')!
-      expect(dot.style.backgroundColor).not.toBe('')
+      expect(dot.getAttribute('style')).toContain('linear-gradient')
     }
     expect(screen.getByRole('option', { name: 'Classic' })).toHaveAttribute('aria-selected', 'true')
   })
