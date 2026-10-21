@@ -1,5 +1,13 @@
 # @xex/tokens
 
+## 0.8.0
+
+### Minor Changes
+
+- 412c729: New `Combobox`: one dropdown for single or multiple choice, with an optional search box (shown by default for more than 8 options), icons, and slots for a header, notices and lazy loading. `FontPicker`, `ThemeSelect` and `MultiSelect` are now built on it, so all their dropdowns share the same shape (the popup has the control's rounded corners, sits 4px below it, with a thin faint shadow) and the same keyboard behaviour. The font picker remembers its category chip for the browser session, and rows no longer get a theme-coloured border on hover (keyboard navigation keeps its ring). Native `Select` stays the default for plain form fields. New `ScrollRail`: a thin draggable scroll control in the style of "On this page", used by the dropdown lists in place of the browser's scrollbar. `MultiSelect`'s options are now `role="option"` in a listbox, not checkboxes in a group. `useTheme()` also returns `storagePrefix`.
+- 412c729: Dark mode uses neutral greys instead of navy blues: the page, cards, borders, grey text scale, progress-ring track and loading overlay no longer have a blue cast. The brand colour still tints what asks for it (buttons, links, accent backgrounds), now mixed into the neutral background. Contrast is unchanged in every theme (WCAG AA).
+- 412c729: `Section` takes `appearance="card"` (default) or `"plain"` (no border, background or shadow, for use inside another panel), and `padded={false}` to drop a plain Section's padding (a card is always padded). `Sidebar` entries can have `children`, shown indented beneath their parent.
+
 ## 0.7.0
 
 ### Minor Changes
