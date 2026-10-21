@@ -82,6 +82,10 @@ export const SNIPPETS: Record<string, Snippet> = {
   Textarea: (p) => el('Textarea', p ?? ['label="Notes"', 'placeholder="Write something…"', 'rows={3}']),
   Select: (p) =>
     el('Select', p ?? ['label="Role"', 'value={role}', 'onChange={(e) => setRole(e.target.value)}', "options={[{ value: 'admin', label: 'Admin' }, { value: 'member', label: 'Member' }]}"]),
+  ScrollRail: () =>
+    `<div className="relative">\n  <ul ref={listRef} className={\`max-h-64 overflow-y-auto pr-3 \${scrollbarHidden}\`}>…</ul>\n  <ScrollRail target={listRef} />\n</div>`,
+  Combobox: (p) =>
+    el('Combobox', p ?? ['label="Country"', 'value={country}', 'onChange={setCountry}', "options={[{ value: 'fr', label: 'France' }, { value: 'de', label: 'Germany' }]}"]),
   MultiSelect: () => `<MultiSelect\n  label="Status"\n  options={[{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }]}\n  value={selected}\n  onChange={setSelected}\n/>`,
   Checkbox: (p) => el('Checkbox', p ?? ['label="I agree to the terms"', 'checked={agree}', 'onChange={(e) => setAgree(e.target.checked)}']),
   Radio: () => `<Radio name="plan" value="pro" label="Pro" checked={plan === 'pro'} onChange={() => setPlan('pro')} />`,

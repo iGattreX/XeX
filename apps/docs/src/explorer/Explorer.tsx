@@ -15,7 +15,7 @@ export const applies = (p: PropDef, values: Values) => !p.when || Object.entries
 export function attributesFor(c: ExplorerControl, values: Values): string[] {
   const out: string[] = []
   for (const p of c.props) {
-    if (p.name === c.children || !applies(p, values)) continue
+    if (p.name === c.children || p.hidden || !applies(p, values)) continue
     const v = values[p.name]
     const listed = p.always || v !== p.default
     if (p.kind === 'select' && listed) out.push(`${p.name}="${v}"`)
@@ -97,7 +97,7 @@ export function Explorer() {
           {control.render(values, set)}
         </div>
         <div className="space-y-3" role="group" aria-label={`${control.id} options`}>
-          {control.props.filter((def) => applies(def, values)).map((def) => (
+          {control.props.filter((def) => !def.hidden && applies(def, values)).map((def) => (
             <Field key={def.name} def={def} value={values[def.name]} onChange={(v) => set(def.name, v)} />
           ))}
         </div>

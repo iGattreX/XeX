@@ -23,6 +23,8 @@ export interface ThemeContextValue {
   /** Most recently used fonts, newest first (max 5). */
   recentFonts: FontChoice[]
   setFont: (font: FontChoice) => void
+  /** The prefix this provider stores its choices under (for related per-app settings, e.g. the font picker's category). */
+  storagePrefix: string
 }
 
 export interface ThemeProviderProps {
@@ -161,8 +163,8 @@ export function ThemeProvider({
   const toggleMode = useCallback(() => setMode(mode === 'dark' ? 'light' : 'dark'), [mode, setMode])
 
   const value = useMemo(
-    () => ({ theme, themes, setThemeId, mode, setMode, toggleMode, font, recentFonts, setFont }),
-    [theme, themes, setThemeId, mode, setMode, toggleMode, font, recentFonts, setFont],
+    () => ({ theme, themes, setThemeId, mode, setMode, toggleMode, font, recentFonts, setFont, storagePrefix }),
+    [theme, themes, setThemeId, mode, setMode, toggleMode, font, recentFonts, setFont, storagePrefix],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

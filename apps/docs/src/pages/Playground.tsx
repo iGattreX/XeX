@@ -38,6 +38,7 @@ import {
   Select,
   Switch,
   SegmentedControl,
+  Combobox,
   ThemeSelect,
   ModeToggle,
   Checkbox,
@@ -93,6 +94,9 @@ function Tile({ name, component, code, codeProps, children }: { name: string; co
   )
 }
 
+const COUNTRIES = ['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Germany', 'India', 'Japan', 'Kenya', 'Mexico', 'Norway'].map((c) => ({ value: c.toLowerCase(), label: c }))
+const LANGUAGES = ['English', 'French', 'German', 'Hindi', 'Japanese', 'Spanish'].map((l) => ({ value: l.toLowerCase(), label: l }))
+
 const Label = ({ children }: { children: ReactNode }) => (
   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{children}</p>
 )
@@ -120,6 +124,8 @@ export function Playground() {
   const [plan, setPlan] = useState('pro')
   const [volume, setVolume] = useState(40)
   const [agree, setAgree] = useState(false)
+  const [country, setCountry] = useState('')
+  const [languages, setLanguages] = useState<string[]>([])
   const submitted = name.length > 0 && name.length < 3
 
   // Tabs
@@ -382,6 +388,27 @@ options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe
 disabled
 defaultValue="a"
 options={[{ value: 'a', label: 'Unavailable' }]}`} label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
+          <div
+            data-code="Combobox"
+            data-code-props={`label="Country"
+placeholder="Choose a country"
+value={country}
+onChange={setCountry}
+options={countries}`}
+          >
+            <Combobox label="Country" placeholder="Choose a country" hint="More than 8 options adds a search box" options={COUNTRIES} value={country} onChange={setCountry} />
+          </div>
+          <div
+            data-code="Combobox"
+            data-code-props={`multiple
+label="Languages"
+placeholder="Any language"
+value={languages}
+onChange={setLanguages}
+options={languageOptions}`}
+          >
+            <Combobox multiple label="Languages" placeholder="Any language" hint="Several choices, checkboxes" options={LANGUAGES} value={languages} onChange={setLanguages} />
+          </div>
           <Input data-code="Input" data-code-props={`label="Date"
 type="date"`} label="Date" type="date" />
           <Textarea data-code="Textarea" data-code-props={`label="Notes (textarea)"

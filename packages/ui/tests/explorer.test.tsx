@@ -28,7 +28,7 @@ function other(p: PropDef, current: string | number | boolean): string | number 
 }
 
 // Behaviour-only options that leave no trace in the markup of a freshly rendered control.
-const BEHAVIOUR_ONLY = new Set(['Tabs.activation'])
+const BEHAVIOUR_ONLY = new Set(['Tabs.activation', 'Combobox.searchable', 'Combobox.picked']) // only visible while the list is open, or demo state
 
 describe('options explorer', () => {
   it('only lists controls the library exports and that have a code snippet', () => {

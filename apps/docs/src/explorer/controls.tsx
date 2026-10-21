@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Avatar, Badge, Button, DataTable, Header, Input, ProgressBar, Section, Spinner, Switch, Tabs } from '@xex/ui'
+import { Avatar, Badge, Button, Combobox, DataTable, Header, Input, ProgressBar, Section, Spinner, Switch, Tabs } from '@xex/ui'
 import { PEOPLE, USER_COLUMNS } from '../pages/demoData'
 
 // What the "Explore options" section knows about each control: the options it takes (name, kind,
@@ -18,6 +18,8 @@ type PropBase = {
   name: string
   initial?: string | number | boolean
   always?: boolean
+  /** Demo state the control needs, not an option: not shown in the panel or the code. */
+  hidden?: boolean
   /** Only offered (and listed in the code) while these other options have these values. */
   when?: Record<string, string>
 }
@@ -109,6 +111,36 @@ export const CONTROLS: ExplorerControl[] = [
         error={s(v, 'error') || undefined}
         disabled={b(v, 'disabled')}
       />
+    ),
+  },
+  {
+    id: 'Combobox',
+    codeBase: ['options={options}', 'value={value}', 'onChange={setValue}'],
+    props: [
+      { name: 'label', kind: 'text', default: '', initial: 'Country' },
+      { name: 'placeholder', kind: 'text', default: 'Select…', initial: 'Choose a country' },
+      { name: 'searchable', kind: 'select', options: ['auto', 'true', 'false'], default: 'auto' },
+      { name: 'hint', kind: 'text', default: '' },
+      { name: 'error', kind: 'text', default: '' },
+      { name: 'disabled', kind: 'boolean', default: false },
+      // the chosen value is demo state, not an option
+      { name: 'picked', kind: 'text', default: '', hidden: true },
+    ],
+    render: (v, set) => (
+      <div className="w-64">
+        <Combobox
+          label={s(v, 'label') || undefined}
+          aria-label={s(v, 'label') ? undefined : 'Country'}
+          placeholder={s(v, 'placeholder')}
+          searchable={s(v, 'searchable') === 'auto' ? 'auto' : s(v, 'searchable') === 'true'}
+          hint={s(v, 'hint') || undefined}
+          error={s(v, 'error') || undefined}
+          disabled={b(v, 'disabled')}
+          options={['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Germany', 'India', 'Japan', 'Kenya'].map((c) => ({ value: c, label: c }))}
+          value={s(v, 'picked')}
+          onChange={(c) => set('picked', c)}
+        />
+      </div>
     ),
   },
   {
