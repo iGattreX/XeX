@@ -301,7 +301,12 @@ export function Combobox(props: ComboboxProps) {
   let triggerContent: ReactNode
   if (multiple) {
     const names = selectedOptions.map((o) => o.label)
-    triggerContent = <span className="truncate">{names.length === 0 ? placeholder : names.length <= 2 ? names.join(', ') : `${names.length} selected`}</span>
+    // the placeholder is grey, as in single mode; chosen values are normal text
+    triggerContent = (
+      <span className={clsx('truncate', names.length === 0 && 'text-gray-500')}>
+        {names.length === 0 ? placeholder : names.length <= 2 ? names.join(', ') : `${names.length} selected`}
+      </span>
+    )
   } else if (renderValue) {
     triggerContent = renderValue(selectedOptions[0])
   } else {

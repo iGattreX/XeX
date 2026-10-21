@@ -147,3 +147,15 @@ describe('Combobox (multiple)', () => {
     expect(screen.getByRole('option', { name: 'Beta' })).toHaveAttribute('aria-selected', 'true')
   })
 })
+
+describe('Combobox placeholder', () => {
+  it('is the same grey in single and multiple mode, and chosen values are normal text', () => {
+    const { rerender } = render(<Combobox label="Letter" placeholder="Pick" options={few} value="" onChange={() => {}} />)
+    const placeholder = () => screen.getByText('Pick')
+    expect(placeholder().className).toContain('text-gray-500')
+    rerender(<Combobox multiple label="Letter" placeholder="Pick" options={few} value={[]} onChange={() => {}} />)
+    expect(placeholder().className).toContain('text-gray-500')
+    rerender(<Combobox multiple label="Letter" placeholder="Pick" options={few} value={['a']} onChange={() => {}} />)
+    expect(screen.getByText('Alpha').className).not.toContain('text-gray-500')
+  })
+})

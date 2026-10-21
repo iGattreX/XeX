@@ -30,6 +30,8 @@ export type PropDef = PropBase &
     | { kind: 'boolean'; default: boolean }
     | { kind: 'text'; default: string }
     | { kind: 'number'; default: number; min: number; max: number }
+    /** A list of items, one per line, that the control is built from. */
+    | { kind: 'lines'; default: string }
   )
 
 export interface ExplorerControl {
@@ -48,6 +50,10 @@ export interface ExplorerControl {
 }
 
 const s = (v: Values, name: string) => String(v[name])
+/** The items a Combobox demo is built from: one per non-empty line. */
+const itemsOf = (v: Values) => s(v, 'items').split('\n').map((x) => x.trim()).filter(Boolean)
+const PICK_SEP = '\u001f'
+const COMBOBOX_ITEMS = ['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Germany', 'India', 'Japan', 'Kenya'].join('\n')
 const b = (v: Values, name: string) => v[name] === true
 const n = (v: Values, name: string) => Number(v[name])
 
@@ -115,33 +121,56 @@ export const CONTROLS: ExplorerControl[] = [
   },
   {
     id: 'Combobox',
-    codeBase: ['options={options}', 'value={value}', 'onChange={setValue}'],
     props: [
+      { name: 'multiple', kind: 'boolean', default: false },
       { name: 'label', kind: 'text', default: '', initial: 'Country' },
       { name: 'placeholder', kind: 'text', default: 'Select…', initial: 'Choose a country' },
       { name: 'searchable', kind: 'select', options: ['auto', 'true', 'false'], default: 'auto' },
       { name: 'hint', kind: 'text', default: '' },
       { name: 'error', kind: 'text', default: '' },
       { name: 'disabled', kind: 'boolean', default: false },
-      // the chosen value is demo state, not an option
+      // the items to choose from; they are the options of the control (a value and a label each)
+      { name: 'items', kind: 'lines', default: '', initial: COMBOBOX_ITEMS },
+      // the chosen value(s) are demo state, not an option
       { name: 'picked', kind: 'text', default: '', hidden: true },
     ],
-    render: (v, set) => (
-      <div className="w-64">
-        <Combobox
-          label={s(v, 'label') || undefined}
-          aria-label={s(v, 'label') ? undefined : 'Country'}
-          placeholder={s(v, 'placeholder')}
-          searchable={s(v, 'searchable') === 'auto' ? 'auto' : s(v, 'searchable') === 'true'}
-          hint={s(v, 'hint') || undefined}
-          error={s(v, 'error') || undefined}
-          disabled={b(v, 'disabled')}
-          options={['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Germany', 'India', 'Japan', 'Kenya'].map((c) => ({ value: c, label: c }))}
-          value={s(v, 'picked')}
-          onChange={(c) => set('picked', c)}
-        />
-      </div>
-    ),
+    codeProps: (v, attrs) => {
+      const multi = b(v, 'multiple')
+      const items = itemsOf(v)
+      const quote = (text: string) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+      const rows = items.map((i) => `    { value: ${quote(i)}, label: ${quote(i)} },`)
+      const options = rows.length ? `options={[\n${rows.join('\n')}\n  ]}` : 'options={[]}'
+      return [...attrs.filter((a) => !a.startsWith('items=')), multi ? 'value={values}' : 'value={value}', multi ? 'onChange={setValues}' : 'onChange={setValue}', options]
+    },
+    render: (v, set) => {
+      const items = itemsOf(v)
+      const common = {
+        label: s(v, 'label') || undefined,
+        'aria-label': s(v, 'label') ? undefined : 'Items',
+        placeholder: s(v, 'placeholder'),
+        searchable: s(v, 'searchable') === 'auto' ? ('auto' as const) : s(v, 'searchable') === 'true',
+        hint: s(v, 'hint') || undefined,
+        error: s(v, 'error') || undefined,
+        disabled: b(v, 'disabled'),
+        options: items.map((c) => ({ value: c, label: c })),
+      }
+      const picked = s(v, 'picked')
+      return (
+        <div className="w-64">
+          {b(v, 'multiple') ? (
+            <Combobox
+              key="multiple"
+              {...common}
+              multiple
+              value={picked.split(PICK_SEP).filter((x) => items.includes(x))}
+              onChange={(chosen) => set('picked', chosen.join(PICK_SEP))}
+            />
+          ) : (
+            <Combobox key="single" {...common} value={items.includes(picked) ? picked : ''} onChange={(c) => set('picked', c)} />
+          )}
+        </div>
+      )
+    },
   },
   {
     id: 'Switch',
@@ -188,9 +217,13 @@ export const CONTROLS: ExplorerControl[] = [
     ],
     render: (v) => (
       <div className="w-full max-w-lg">
-        <Section id="explorer-section-preview" title={s(v, 'title')} description={s(v, 'description') || undefined} appearance={s(v, 'appearance') as 'card'} padded={b(v, 'padded')}>
-          <p className="rounded-md bg-accent-soft px-3 py-2 text-sm text-accent">{s(v, 'content')}</p>
-        </Section>
+        {/* The dashed line is only a guide to where the Section's box ends (so padding shows); it is not part of the code. */}
+        <div className="[&>section]:outline [&>section]:outline-1 [&>section]:-outline-offset-1 [&>section]:outline-dashed [&>section]:outline-gray-400">
+          <Section id="explorer-section-preview" title={s(v, 'title')} description={s(v, 'description') || undefined} appearance={s(v, 'appearance') as 'card'} padded={b(v, 'padded')}>
+            <p className="text-sm text-gray-700">{s(v, 'content')}</p>
+          </Section>
+        </div>
+        <p className="mt-2 text-center text-xs text-gray-500">Dashed line: the edge of the Section's box (a guide, not part of the code)</p>
       </div>
     ),
   },

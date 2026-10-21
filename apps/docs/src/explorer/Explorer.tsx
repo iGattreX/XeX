@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { CheckIcon, Square2StackIcon } from '@heroicons/react/24/outline'
-import { Button, Input, Select, Switch } from '@xex/ui'
+import { Button, Combobox, Input, Switch, Textarea } from '@xex/ui'
 import { codeFor } from '../code/snippets'
 import { CONTROLS, type ExplorerControl, type PropDef, type Values } from './controls'
 
@@ -22,6 +22,7 @@ export function attributesFor(c: ExplorerControl, values: Values): string[] {
     else if (p.kind === 'boolean' && listed) out.push(v ? p.name : `${p.name}={false}`)
     else if (p.kind === 'number' && listed) out.push(`${p.name}={${v}}`)
     else if (p.kind === 'text' && v !== '') out.push(`${p.name}="${v}"`)
+    // a list of items is not an attribute: the control's codeProps turns it into its options
   }
   return out
 }
@@ -36,9 +37,11 @@ export function codeText(c: ExplorerControl, values: Values): string | null {
 function Field({ def, value, onChange }: { def: PropDef; value: string | number | boolean; onChange: (v: string | number | boolean) => void }) {
   switch (def.kind) {
     case 'select':
-      return <Select label={def.name} value={String(value)} onChange={(e) => onChange(e.target.value)} options={def.options.map((o) => ({ value: o, label: o }))} />
+      return <Combobox label={def.name} value={String(value)} onChange={onChange} options={def.options.map((o) => ({ value: o, label: o }))} />
     case 'boolean':
       return <Switch checked={value === true} onChange={onChange} label={def.name} />
+    case 'lines':
+      return <Textarea label={def.name} hint="One per line" rows={5} value={String(value)} onChange={(e) => onChange(e.target.value)} />
     case 'number':
       return (
         <Input
@@ -84,7 +87,7 @@ export function Explorer() {
   return (
     <div data-explorer className="space-y-4">
       <div className="flex flex-wrap items-end gap-3">
-        <Select className="w-56" label="Control" value={id} onChange={(e) => setId(e.target.value)} options={CONTROLS.map((c) => ({ value: c.id, label: c.id }))} />
+        <Combobox className="w-56" label="Control" value={id} onChange={setId} options={CONTROLS.map((c) => ({ value: c.id, label: c.id }))} />
         {changed && (
           <Button variant="ghost" size="sm" onClick={() => setChosen(({ [id]: _drop, ...rest }) => rest)}>
             Reset options
