@@ -61,9 +61,9 @@ describe('DataTable', () => {
 
   it('filters a column with several values at once (multi-select)', async () => {
     render(<DataTable label="People" rows={rows} columns={columns} rowKey={(r) => r.id} />)
-    await userEvent.click(screen.getByRole('button', { name: /any role/i }))
-    await userEvent.click(screen.getByRole('checkbox', { name: /Admin/ }))
-    await userEvent.click(screen.getByRole('checkbox', { name: /Viewer/ }))
+    await userEvent.click(screen.getByRole('combobox', { name: /any role/i }))
+    await userEvent.click(screen.getByRole('option', { name: /Admin/ }))
+    await userEvent.click(screen.getByRole('option', { name: /Viewer/ }))
     expect(names()).toEqual(['Ada', 'Cy', 'Dee'])
   })
 

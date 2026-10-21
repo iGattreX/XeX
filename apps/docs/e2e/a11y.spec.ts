@@ -40,7 +40,7 @@ for (const mode of ['light', 'dark'] as const) {
     })
   }
 
-  for (const route of ['typography', 'icons']) {
+  for (const route of ['options', 'typography', 'icons']) {
     test(`${route} · classic · ${mode}`, async ({ page }) => {
       await open(page, route, 'classic', mode)
       expect(await violations(page)).toEqual([])
@@ -63,8 +63,8 @@ for (const mode of ['light', 'dark'] as const) {
     expect(await violations(page)).toEqual([])
     await page.keyboard.press('Escape')
 
-    await page.getByRole('button', { name: 'All roles' }).first().click()
-    await expect(page.getByRole('group', { name: 'All roles' })).toBeVisible()
+    await page.getByRole('combobox', { name: 'All roles' }).first().click()
+    await expect(page.getByRole('listbox', { name: 'All roles' })).toBeVisible()
     expect(await violations(page)).toEqual([])
   })
 }

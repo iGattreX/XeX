@@ -106,3 +106,18 @@ describe('useSidebarCollapsed', () => {
     expect(screen.getByRole('button')).toHaveTextContent('docked')
   })
 })
+
+describe('Sidebar sub-items', () => {
+  it('lists child pages indented under their parent, and selecting one reports it', async () => {
+    const onSelect = vi.fn()
+    const nested = [
+      { id: 'a', label: 'Alpha', icon: HomeIcon, children: [{ id: 'a1', label: 'Alpha options', icon: HomeIcon }] },
+      { id: 'b', label: 'Beta', icon: HomeIcon },
+    ]
+    render(<Sidebar items={nested} active="a1" onSelect={onSelect} open onClose={() => {}} collapsed />)
+    expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['Alpha', 'Alpha options', 'Beta'])
+    expect(screen.getByRole('link', { name: 'Alpha options' })).toHaveAttribute('aria-current', 'page')
+    await userEvent.click(screen.getByRole('link', { name: 'Alpha options' }))
+    expect(onSelect).toHaveBeenCalledWith('a1')
+  })
+})

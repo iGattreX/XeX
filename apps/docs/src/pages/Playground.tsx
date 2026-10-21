@@ -16,6 +16,7 @@ import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/soli
 import { SHADE_STEPS } from '@xex/tokens'
 import { FontPicker } from '@xex/ui/font-picker'
 import { CodeDock, useCodeDock } from '../code/CodeDock'
+import { PEOPLE, ROLES, USER_COLUMNS } from './demoData'
 import {
   Avatar,
   Badge,
@@ -33,11 +34,11 @@ import {
   SkeletonText,
   Spinner,
   Tabs,
-  type DataTableColumn,
   type FetchState,
   Select,
   Switch,
   SegmentedControl,
+  Combobox,
   ThemeSelect,
   ModeToggle,
   Checkbox,
@@ -93,6 +94,9 @@ function Tile({ name, component, code, codeProps, children }: { name: string; co
   )
 }
 
+const COUNTRIES = ['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Germany', 'India', 'Japan', 'Kenya', 'Mexico', 'Norway'].map((c) => ({ value: c.toLowerCase(), label: c }))
+const LANGUAGES = ['English', 'French', 'German', 'Hindi', 'Japanese', 'Spanish'].map((l) => ({ value: l.toLowerCase(), label: l }))
+
 const Label = ({ children }: { children: ReactNode }) => (
   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{children}</p>
 )
@@ -102,55 +106,6 @@ const BUTTON_SIZES: ButtonSize[] = ['xs', 'sm', 'md', 'lg']
 const BADGE_VARIANTS: BadgeVariant[] = ['default', 'success', 'warning', 'danger', 'info', 'purple', 'gray']
 const AVATAR_SIZES: AvatarSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
 const MODAL_SIZES: ModalSize[] = ['sm', 'md', 'lg', 'xl']
-
-const FIRST = ['Ada', 'Grace', 'Linus', 'Margaret', 'Alan', 'Barbara', 'Dennis', 'Radia', 'Ken', 'Hedy', 'Tim', 'Katherine']
-const LAST = ['Lovelace', 'Hopper', 'Torvalds', 'Hamilton', 'Turing', 'Liskov', 'Ritchie', 'Perlman', 'Thompson', 'Lamarr', 'Berners-Lee', 'Johnson']
-const ROLES = ['Admin', 'Editor', 'Viewer', 'Billing']
-const STATUS: { label: string; variant: BadgeVariant }[] = [
-  { label: 'Active', variant: 'success' },
-  { label: 'Pending', variant: 'warning' },
-  { label: 'Suspended', variant: 'danger' },
-  { label: 'Invited', variant: 'info' },
-]
-const PEOPLE = Array.from({ length: 47 }, (_, i) => ({
-  id: i + 1,
-  name: `${FIRST[i % FIRST.length]} ${LAST[(i * 5 + 3) % LAST.length]}`,
-  role: ROLES[i % ROLES.length],
-  status: STATUS[(i * 7 + Math.floor(i / 3)) % STATUS.length],
-  seats: ((i * 13) % 9) + 1,
-}))
-
-type Person = (typeof PEOPLE)[number]
-
-const USER_COLUMNS: DataTableColumn<Person>[] = [
-  {
-    id: 'user',
-    header: 'User',
-    width: 3,
-    accessor: (p) => p.name,
-    cell: (p, { dense }) => (
-      <div className="flex items-center gap-3">
-        <Avatar name={p.name} size={dense ? 'xs' : 'sm'} />
-        <span className="font-medium text-gray-900">{p.name}</span>
-      </div>
-    ),
-  },
-  { id: 'role', header: 'Role', width: 2, accessor: (p) => p.role, filter: true, filterLabel: 'All roles' },
-  {
-    id: 'status',
-    header: 'Status',
-    width: 2,
-    accessor: (p) => p.status.label,
-    filter: true,
-    filterLabel: 'All statuses',
-    cell: (p) => (
-      <Badge variant={p.status.variant} dot>
-        {p.status.label}
-      </Badge>
-    ),
-  },
-  { id: 'seats', header: 'Seats', width: 1, accessor: (p) => p.seats, cell: (p) => <span className="weight-pill">{p.seats}</span> },
-]
 
 export function Playground() {
   const { theme, font } = useTheme()
@@ -169,6 +124,8 @@ export function Playground() {
   const [plan, setPlan] = useState('pro')
   const [volume, setVolume] = useState(40)
   const [agree, setAgree] = useState(false)
+  const [country, setCountry] = useState('')
+  const [languages, setLanguages] = useState<string[]>([])
   const submitted = name.length > 0 && name.length < 3
 
   // Tabs
@@ -431,6 +388,27 @@ options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe
 disabled
 defaultValue="a"
 options={[{ value: 'a', label: 'Unavailable' }]}`} label="Disabled select" disabled defaultValue="a" options={[{ value: 'a', label: 'Unavailable' }]} />
+          <div
+            data-code="Combobox"
+            data-code-props={`label="Country"
+placeholder="Choose a country"
+value={country}
+onChange={setCountry}
+options={countries}`}
+          >
+            <Combobox label="Country" placeholder="Choose a country" hint="More than 8 options adds a search box" options={COUNTRIES} value={country} onChange={setCountry} />
+          </div>
+          <div
+            data-code="Combobox"
+            data-code-props={`multiple
+label="Languages"
+placeholder="Any language"
+value={languages}
+onChange={setLanguages}
+options={languageOptions}`}
+          >
+            <Combobox multiple label="Languages" placeholder="Any language" hint="Several choices, checkboxes" options={LANGUAGES} value={languages} onChange={setLanguages} />
+          </div>
           <Input data-code="Input" data-code-props={`label="Date"
 type="date"`} label="Date" type="date" />
           <Textarea data-code="Textarea" data-code-props={`label="Notes (textarea)"

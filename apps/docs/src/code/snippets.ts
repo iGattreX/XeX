@@ -15,6 +15,7 @@ const propList = (props: string | string[]) => (Array.isArray(props) ? props : p
 function el(tag: string, props: string | string[]): string {
   const list = propList(props)
   const inline = list.join(' ')
+  if (list.length === 0) return `<${tag} />`
   return inline.length <= 64 ? `<${tag} ${inline} />` : `<${tag}\n  ${list.join('\n  ')}\n/>`
 }
 
@@ -81,6 +82,10 @@ export const SNIPPETS: Record<string, Snippet> = {
   Textarea: (p) => el('Textarea', p ?? ['label="Notes"', 'placeholder="Write something…"', 'rows={3}']),
   Select: (p) =>
     el('Select', p ?? ['label="Role"', 'value={role}', 'onChange={(e) => setRole(e.target.value)}', "options={[{ value: 'admin', label: 'Admin' }, { value: 'member', label: 'Member' }]}"]),
+  ScrollRail: () =>
+    `<div className="relative">\n  <ul ref={listRef} className={\`max-h-64 overflow-y-auto pr-3 \${scrollbarHidden}\`}>…</ul>\n  <ScrollRail target={listRef} />\n</div>`,
+  Combobox: (p) =>
+    el('Combobox', p ?? ['label="Country"', 'value={country}', 'onChange={setCountry}', "options={[{ value: 'fr', label: 'France' }, { value: 'de', label: 'Germany' }]}"]),
   MultiSelect: () => `<MultiSelect\n  label="Status"\n  options={[{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }]}\n  value={selected}\n  onChange={setSelected}\n/>`,
   Checkbox: (p) => el('Checkbox', p ?? ['label="I agree to the terms"', 'checked={agree}', 'onChange={(e) => setAgree(e.target.checked)}']),
   Radio: () => `<Radio name="plan" value="pro" label="Pro" checked={plan === 'pro'} onChange={() => setPlan('pro')} />`,
@@ -88,7 +93,7 @@ export const SNIPPETS: Record<string, Snippet> = {
     el('RadioGroup', p ?? ['label="Plan"', 'value={plan}', 'onChange={setPlan}', "options={[{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }]}"]),
   Switch: (p) => el('Switch', p ?? ['checked={notify}', 'onChange={setNotify}', 'label="Notifications"']),
   SegmentedControl: () => `<SegmentedControl\n  label="Density"\n  value={density}\n  onChange={setDensity}\n  options={[{ value: 'comfortable', label: 'Comfortable' }, { value: 'compact', label: 'Compact' }]}\n/>`,
-  Tabs: (p) => el('Tabs', TABS[p ?? 'underline'] ?? TABS.underline),
+  Tabs: (p) => el('Tabs', p && !TABS[p] ? p : (TABS[p ?? 'underline'] ?? TABS.underline)), // p: a demo's key, or a props list
   Modal: (p, label) =>
     block(
       'Modal',
@@ -107,8 +112,10 @@ export const SNIPPETS: Record<string, Snippet> = {
       '…',
     ),
   ConfirmDialog: () => `<ConfirmDialog\n  open={open}\n  title="Delete this project?"\n  message="All files and history will be permanently removed. This cannot be undone."\n  onCancel={() => setOpen(false)}\n  onConfirm={remove}\n/>`,
-  DataTable: () =>
-    [
+  DataTable: (p) =>
+    p
+      ? el('DataTable', p)
+      : [
       '<DataTable',
       '  label="Users"',
       '  rows={people}',
@@ -139,9 +146,10 @@ export const SNIPPETS: Record<string, Snippet> = {
   ModeToggle: () => `<ModeToggle />`,
   Sidebar: () => `<Sidebar\n  items={[{ id: 'home', label: 'Home', icon: HomeIcon }]}\n  active={page}\n  onSelect={setPage}\n  open={drawerOpen}\n  onClose={() => setDrawerOpen(false)}\n  brand={<SidebarBrand name="Acme" />}\n/>`,
   SidebarBrand: () => `<SidebarBrand name="Acme" mark={<BoltIcon className="h-5 w-5" />} />`,
-  Header: () => `<Header title="Dashboard" subtitle="Everything at a glance" density="compact" onMenu={() => setDrawerOpen(true)} actions={<ThemeSwitcher variant="dropdown" />} />`,
+  Header: (p) =>
+    el('Header', p ?? ['title="Dashboard"', 'subtitle="Everything at a glance"', 'density="compact"', 'onMenu={() => setDrawerOpen(true)}', 'actions={<ThemeSwitcher variant="dropdown" />}']),
   PageGuide: () => `<PageGuide sections={[{ id: 'intro', label: 'Intro' }, { id: 'usage', label: 'Usage' }]} />`,
-  Section: () => `<Section id="intro" title="Intro" description="Shown in the On this page guide">\n  …\n</Section>`,
+  Section: (p, label) => block('Section', p ?? ['id="intro"', 'title="Intro"', 'description="Shown in the On this page guide"'], label ?? '…'),
   FontPicker: () => `<FontPicker />`,
 
   // Not components: native inputs and global classes the system styles. Listed here so every

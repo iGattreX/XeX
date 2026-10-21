@@ -1,8 +1,9 @@
 import { lazy, type ComponentType, type LazyExoticComponent, type SVGProps } from 'react'
-import { AdjustmentsHorizontalIcon, DocumentTextIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { AdjustmentsHorizontalIcon, DocumentTextIcon, PhotoIcon, SwatchIcon } from '@heroicons/react/24/outline'
 import type { PageSection } from '@xex/ui'
 import { Playground, SECTIONS } from './Playground'
 import { Typography, TYPE_SECTIONS } from './Typography'
+import { Options, OPTION_SECTIONS } from './Options'
 
 // The icon page pulls in every Heroicon, so it is split into its own chunk.
 const Icons = lazy(() => import('./Icons'))
@@ -23,6 +24,8 @@ export interface PageDef {
   component: ComponentType | LazyExoticComponent<ComponentType>
   /** Drives the floating "On this page" guide. */
   sections: PageSection[]
+  /** Id of the page this one is listed under in the navigation. */
+  parent?: string
 }
 
 export const PAGES: PageDef[] = [
@@ -34,6 +37,16 @@ export const PAGES: PageDef[] = [
     icon: AdjustmentsHorizontalIcon,
     component: Playground,
     sections: SECTIONS,
+  },
+  {
+    id: 'options',
+    label: 'Explore options',
+    title: 'Explore options',
+    subtitle: "Change a control's options and see it, and its code, update.",
+    icon: SwatchIcon,
+    component: Options,
+    sections: OPTION_SECTIONS,
+    parent: 'controls',
   },
   {
     id: 'typography',
