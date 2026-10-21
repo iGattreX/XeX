@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { ArrowsRightLeftIcon, ArrowsUpDownIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Button } from './Button'
 import { Input } from './Input'
 import { PaginationBar } from './PaginationBar'
@@ -51,6 +51,15 @@ export interface DataTableProps<T> {
    * others are label/value pairs.
    */
   cards?: 'auto' | 'always' | 'never'
+  /**
+   * Make rows (and cards) open a details view. `true` shows every column as a read-only list; a
+   * function renders your own content (a form, say) for the row. In a table the details open in a
+   * side panel beside the list; on cards, or when the table is narrow, they replace the list, with
+   * a Back button. Search, filters, sort and page are kept.
+   */
+  detail?: boolean | ((row: T) => ReactNode)
+  /** Heading of the details view. Defaults to the first column's value. */
+  detailTitle?: (row: T) => string
 }
 
 type Layout = 'comfortable' | 'compact' | 'cards'
@@ -64,6 +73,8 @@ const MIN_COL_PX = 64
 const MIN_TABLE_COL_PX = 96
 /** Below this width (px) an `auto` table shows cards. */
 const CARD_BREAKPOINT_PX = 560
+/** A table needs at least this width (px) to have its details open in a side panel. */
+const SIDE_PANEL_MIN_PX = 800
 
 /**
  * Move the boundary between column `i` and column `i + 1` by `delta` (a fraction of the table
@@ -99,6 +110,8 @@ export function DataTable<T>({
   initialSort,
   emptyMessage = 'No rows match your filters.',
   cards = 'auto',
+  detail,
+  detailTitle,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<Record<string, string[]>>({})
@@ -125,6 +138,34 @@ export function DataTable<T>({
   const dense = layout === 'compact'
   const cardColumns = width >= 960 ? 3 : width >= 640 ? 2 : 1
 
+  // Row details. Opened from a row or a card; beside the list when there is room, otherwise in its place.
+  const detailEnabled = !!detail
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [returnTo, setReturnTo] = useState<string | null>(null)
+  const uid = useId()
+  const panelId = `${uid}-detail`
+  const headingId = `${uid}-detail-title`
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const openRow = detailEnabled && openId !== null ? (rows.find((r) => String(rowKey(r)) === openId) ?? null) : null
+  const sideBySide = !asCards && (width === 0 || width >= SIDE_PANEL_MIN_PX) // unmeasured (0) counts as roomy
+  const replacing = openRow !== null && !sideBySide
+
+  const open = (row: T) => setOpenId(String(rowKey(row)))
+  const close = () => {
+    setReturnTo(openId)
+    setOpenId(null)
+  }
+  // Opening moves focus to the heading of the details; closing returns it to the row that was opened.
+  useEffect(() => {
+    if (openRow) headingRef.current?.focus()
+  }, [openId]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (openId !== null || returnTo === null) return
+    const rowEl = Array.from(rootRef.current?.querySelectorAll<HTMLElement>('[data-row-id]') ?? []).find((n) => n.dataset.rowId === returnTo)
+    rowEl?.querySelector<HTMLElement>('[data-open-trigger]')?.focus()
+    setReturnTo(null)
+  }, [openId, returnTo])
+
   // Column widths are fractions of the table width (summing to 1) so they survive container resizes.
   // null = the defaults from each column's `width` weight. Fixed table layout + <colgroup> means the
   // widths never depend on cell content, so sorting / paging can no longer make columns jump.
@@ -137,8 +178,6 @@ export function DataTable<T>({
   const [grow, setGrow] = useState(0)
   const [overflowing, setOverflowing] = useState(false)
   const [resizing, setResizing] = useState<number | null>(null)
-  // Is there more table to scroll to, either side? Drives the edge fades.
-  const [edges, setEdges] = useState({ left: false, right: false })
   const weights = columns.map((c) => c.width ?? 1)
   const weightSum = weights.reduce((a, b) => a + b, 0)
   const defaults = weights.map((w) => w / weightSum)
@@ -152,7 +191,6 @@ export function DataTable<T>({
     if (asCards || !wrapper || !table) return
     const check = () => {
       setOverflowing(table.offsetWidth > wrapper.clientWidth + 1)
-      updateEdges()
     }
     check()
     const ro = new ResizeObserver(check)
@@ -162,13 +200,6 @@ export function DataTable<T>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asCards])
 
-  const updateEdges = () => {
-    const w = wrapperRef.current
-    if (!w) return
-    const left = w.scrollLeft > 0
-    const right = w.scrollLeft + w.clientWidth < w.scrollWidth - 1
-    setEdges((e) => (e.left === left && e.right === right ? e : { left, right }))
-  }
 
   /** Widen / narrow the table by `delta` px, all of it taken by the last column. Never narrower than its container. */
   const growLast = (base: number[], tableWidth: number, startGrow: number, delta: number) => {
@@ -285,6 +316,7 @@ export function DataTable<T>({
   const bar = (placement: 'above' | 'below') => (
     <PaginationBar
       placement={placement}
+      textSize="xs"
       page={current}
       totalPages={totalPages}
       total={visible.length}
@@ -313,12 +345,85 @@ export function DataTable<T>({
   )
 
   const pad = dense ? 'px-4 py-1.5' : 'px-4 py-3'
+  const rowClick = (e: MouseEvent<HTMLElement>, row: T) => {
+    if (!detailEnabled) return
+    // clicks on the row itself (or its open button) open it; other controls inside keep their own behaviour
+    const hit = (e.target as HTMLElement).closest('a, button, input, select, textarea, label, [role="button"]')
+    if (hit && !hit.hasAttribute('data-open-trigger')) return
+    open(row)
+  }
+  /** The first cell is a real button, so keyboard and screen-reader users can open a row too. */
+  const trigger = (row: T, children: ReactNode) =>
+    detailEnabled ? (
+      <button
+        type="button"
+        data-open-trigger
+        aria-controls={String(rowKey(row)) === openId ? panelId : undefined}
+        aria-expanded={String(rowKey(row)) === openId}
+        className="block w-full rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+      >
+        {children}
+      </button>
+    ) : (
+      children
+    )
+  const detailBody = (row: T) =>
+    typeof detail === 'function' ? (
+      detail(row)
+    ) : (
+      <dl className="grid grid-cols-1 gap-4 text-sm">
+        {columns.map((c) => (
+          <div key={c.id} className="min-w-0">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500">{c.cardLabel ?? c.header}</dt>
+            <dd className="mt-0.5 break-words text-gray-800">{renderCell(c, row, false)}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  const detailView = (row: T, mode: 'side' | 'replace') => {
+    const title = detailTitle ? detailTitle(row) : String(columns[0].accessor(row))
+    return (
+      <section
+        id={panelId}
+        aria-labelledby={headingId}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.stopPropagation()
+            close()
+          }
+        }}
+        className={clsx(mode === 'side' && 'w-80 max-w-[40%] shrink-0 self-stretch border-l border-gray-100')}
+      >
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
+          {mode === 'replace' && (
+            <Button variant="ghost" size="sm" icon={<ArrowLeftIcon className="h-4 w-4" />} onClick={close}>
+              Back to {label}
+            </Button>
+          )}
+          <h3 id={headingId} ref={headingRef} tabIndex={-1} className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900 focus:outline-none">
+            {title}
+          </h3>
+          {mode === 'side' && (
+            <button
+              type="button"
+              onClick={close}
+              aria-label={`Close details for ${title}`}
+              className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+        <div className="p-4">{detailBody(row)}</div>
+      </section>
+    )
+  }
   const renderCell = (c: DataTableColumn<T>, row: T, denseCell: boolean) => (c.cell ? c.cell(row, { dense: denseCell }) : <span className="block truncate">{String(c.accessor(row))}</span>)
 
   return (
     <div ref={rootRef} className="rounded-xl border border-gray-200">
-      {(searchable || filterColumns.length > 0 || sort || customized || asCards) && (
-        <div className="flex flex-wrap items-end gap-3 rounded-t-xl border-b border-gray-100 p-3">
+      {!replacing && (searchable || filterColumns.length > 0 || sort || customized || asCards) && (
+        <div className="flex flex-wrap items-end gap-3 rounded-t-xl border-b border-gray-100 p-3 [&>button]:h-8 [&>button]:py-0 [&_button[aria-haspopup]]:h-8 [&_button[aria-haspopup]]:py-0 [&_button]:text-xs [&_input]:h-8 [&_input]:py-0 [&_input]:text-xs [&_label]:text-xs [&_p]:text-xs [&_select]:h-8 [&_select]:py-0 [&_select]:text-xs">
           {searchable && (
             <Input
               className="w-full sm:w-64"
@@ -410,13 +515,26 @@ export function DataTable<T>({
         </div>
       )}
 
-      {bar('above')}
+      {replacing ? (
+        detailView(openRow!, 'replace')
+      ) : (
+        <div className={clsx(openRow && 'flex items-start')}>
+          <div className="min-w-0 flex-1">
+            {bar('above')}
 
       {asCards ? (
         <ul role="list" aria-label={label} className="grid gap-3 p-3" style={{ gridTemplateColumns: `repeat(${cardColumns}, minmax(0, 1fr))` }}>
           {pageRows.map((row) => (
-            <li key={rowKey(row)} className="min-w-0 rounded-xl border border-gray-200 bg-surface p-4">
-              <div className="font-medium text-gray-900">{renderCell(columns[0], row, false)}</div>
+            <li
+              key={rowKey(row)}
+              data-row-id={String(rowKey(row))}
+              onClick={(e) => rowClick(e, row)}
+              className={clsx(
+                'min-w-0 rounded-xl border border-gray-200 bg-surface p-4 transition-shadow [@media(hover:hover)]:hover:shadow-sm',
+                detailEnabled && 'cursor-pointer',
+              )}
+            >
+              <div className="font-medium text-gray-900">{trigger(row, renderCell(columns[0], row, false))}</div>
               {columns.slice(1).some((c) => !c.hideInCards) && (
                 <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                   {columns
@@ -445,8 +563,7 @@ export function DataTable<T>({
         </ul>
       ) : (
         <>
-      <div className="relative">
-      <div ref={wrapperRef} onScroll={updateEdges} className="overflow-x-auto">
+      <div ref={wrapperRef} className="overflow-x-auto">
         <table
           ref={tableRef}
           aria-label={label}
@@ -522,12 +639,24 @@ export function DataTable<T>({
           </thead>
           <tbody>
             {pageRows.map((row) => (
-              <tr key={rowKey(row)} className="border-t border-gray-100 hover:bg-gray-50">
-                {columns.map((c) => (
-                  <td key={c.id} className={clsx(pad, 'overflow-hidden text-gray-600', c.align === 'right' && 'text-right')}>
-                    {c.cell ? c.cell(row, { dense }) : <span className="block truncate">{String(c.accessor(row))}</span>}
-                  </td>
-                ))}
+              <tr
+                key={rowKey(row)}
+                data-row-id={String(rowKey(row))}
+                onClick={(e) => rowClick(e, row)}
+                className={clsx(
+                  'border-t border-gray-100',
+                  openRow && String(rowKey(row)) === openId ? 'bg-accent-soft' : 'hover:bg-gray-50',
+                  detailEnabled && 'cursor-pointer',
+                )}
+              >
+                {columns.map((c, i) => {
+                  const content = c.cell ? c.cell(row, { dense }) : <span className="block truncate">{String(c.accessor(row))}</span>
+                  return (
+                    <td key={c.id} className={clsx(pad, 'overflow-hidden text-gray-600', c.align === 'right' && 'text-right')}>
+                      {i === 0 ? trigger(row, content) : content}
+                    </td>
+                  )
+                })}
               </tr>
             ))}
             {pageRows.length === 0 && (
@@ -545,13 +674,14 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
-      {edges.left && <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/10 to-transparent" aria-hidden="true" />}
-      {edges.right && <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-black/10 to-transparent" aria-hidden="true" />}
-      </div>
         </>
       )}
 
-      {bar('below')}
+            {bar('below')}
+          </div>
+          {openRow && detailView(openRow, 'side')}
+        </div>
+      )}
     </div>
   )
 }

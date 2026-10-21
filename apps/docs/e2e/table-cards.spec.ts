@@ -62,3 +62,60 @@ test.describe('desktop width', () => {
     await expect(users(page).getByRole('list', { name: 'Users' })).toBeVisible()
   })
 })
+
+// Row details: a side panel beside the table, or in place of the list on a phone, with Back.
+
+test.describe('row details · desktop', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('opens beside the table; closing returns focus to the row', async ({ page }) => {
+    await open(page)
+    await users(page).getByRole('button', { name: 'Ada Hamilton' }).click()
+    const panel = users(page).getByRole('region', { name: 'Ada Hamilton' })
+    await expect(panel).toBeVisible()
+    await expect(users(page).getByRole('table')).toBeVisible() // the list stays beside it
+    await expect(panel.getByRole('textbox', { name: 'Name' })).toHaveValue('Ada Hamilton') // the demo's form
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toHaveCount(0)
+    await expect(users(page).getByRole('button', { name: 'Ada Hamilton' })).toBeFocused()
+  })
+
+  test('"Does nothing" makes rows inert and "Shows read-only details" has no fields', async ({ page }) => {
+    await open(page)
+    await users(page).getByRole('radio', { name: 'Does nothing' }).click()
+    await expect(users(page).locator('[data-open-trigger]')).toHaveCount(0)
+    await users(page).getByRole('radio', { name: 'Shows read-only details' }).click()
+    await users(page).getByRole('button', { name: 'Grace Thompson' }).click()
+    const panel = users(page).getByRole('region', { name: 'Grace Thompson' })
+    await expect(panel.getByRole('term')).toHaveCount(4)
+    await expect(panel.getByRole('textbox')).toHaveCount(0)
+  })
+
+  for (const mode of ['light', 'dark'] as const) {
+    test(`the open panel has no accessibility violations · ${mode}`, async ({ page }) => {
+      await open(page, mode)
+      await users(page).getByRole('button', { name: 'Ada Hamilton' }).click()
+      await expect(users(page).getByRole('region', { name: 'Ada Hamilton' })).toBeVisible()
+      await page.waitForTimeout(300)
+      const results = await new AxeBuilder({ page }).include('#table').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+      expect(results.violations.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(', ')}`)).toEqual([])
+    })
+  }
+})
+
+test.describe('row details · phone', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  test('a card opens the details in place of the list, and Back restores it', async ({ page }) => {
+    await open(page)
+    await users(page).getByRole('button', { name: 'Grace Thompson' }).click()
+    await expect(users(page).getByRole('region', { name: 'Grace Thompson' })).toBeVisible()
+    await expect(users(page).getByRole('list', { name: 'Users' })).toHaveCount(0)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
+
+    await users(page).getByRole('button', { name: 'Back to Users' }).click()
+    await expect(users(page).getByRole('list', { name: 'Users' })).toBeVisible()
+    await expect(users(page).getByRole('button', { name: 'Grace Thompson' })).toBeFocused()
+  })
+})
