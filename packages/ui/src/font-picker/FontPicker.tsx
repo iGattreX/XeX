@@ -22,6 +22,8 @@ export function FontPicker() {
   const optId = (i: number) => `${uid}-opt-${i}`
   // Keyboard-highlighted row (aria-activedescendant); focus stays in the search box.
   const [active, setActive] = useState(0)
+  // True after an arrow key, false once the pointer moves: the row ring is for the keyboard only.
+  const [keyboardNav, setKeyboardNav] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
@@ -130,6 +132,7 @@ export function FontPicker() {
   }
 
   const moveActive = (next: number) => {
+    setKeyboardNav(true)
     const i = Math.min(Math.max(next, 0), matches.length - 1)
     scrollToActive.current = true
     setActive(i)
@@ -186,7 +189,7 @@ export function FontPicker() {
         </button>
 
         {open && (
-          <div className="absolute left-0 right-0 z-40 mt-1 rounded-xl border border-gray-200 bg-surface p-2 shadow-xl">
+          <div className="absolute left-0 right-0 z-40 mt-1 rounded-lg border border-gray-200 bg-surface p-2 shadow-sm">
             <div className="relative">
               <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
@@ -201,7 +204,7 @@ export function FontPicker() {
                 aria-label="Search fonts"
                 aria-activedescendant={matches[active] ? optId(active) : undefined}
                 placeholder="Search Google Fonts…"
-                className="w-full rounded-lg border border-gray-300 bg-surface py-1.5 pl-8 pr-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
+                className="w-full rounded-md border border-gray-300 bg-surface py-1.5 pl-8 pr-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400"
               />
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
@@ -235,7 +238,10 @@ export function FontPicker() {
                 </li>
               )}
               {matches.slice(0, visible).map((f, i) => (
-                <li key={f.family} id={optId(i)} role="option" aria-selected={f.family === font.family} onMouseMove={() => i !== active && setActive(i)}>
+                <li key={f.family} id={optId(i)} role="option" aria-selected={f.family === font.family} onMouseMove={() => {
+                  setKeyboardNav(false)
+                  if (i !== active) setActive(i)
+                }}>
                   <button
                     type="button"
                     title={f.family}
@@ -243,7 +249,8 @@ export function FontPicker() {
                     onClick={() => choose(f)}
                     className={clsx(
                       'flex w-full cursor-default items-center justify-between rounded-md px-3 py-1.5 text-left text-sm text-gray-800',
-                      i === active && 'bg-gray-100 ring-2 ring-inset ring-brand-300',
+                      i === active && 'bg-gray-100',
+                      i === active && keyboardNav && 'ring-2 ring-inset ring-brand-300', // keyboard focus indicator; not shown on hover
                       f.family === font.family && 'bg-accent-soft font-medium',
                     )}
                   >

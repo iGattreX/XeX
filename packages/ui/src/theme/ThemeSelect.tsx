@@ -135,7 +135,7 @@ export function ThemeSelect({ className, align = 'right' }: { className?: string
           // keep focus on the trigger while the pointer works the list (the same fix as the font picker)
           onMouseDown={(e) => e.preventDefault()}
           className={clsx(
-            'absolute z-40 mt-2 max-h-[min(26rem,70vh)] w-56 overflow-auto rounded-xl border border-gray-200 bg-surface py-1 shadow-lg',
+            'absolute z-40 mt-1 max-h-[min(26rem,70vh)] w-56 overflow-auto rounded-lg border border-gray-200 bg-surface py-1 shadow-sm',
             side === 'right' ? 'right-0' : 'left-0',
           )}
         >
