@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Avatar, Badge, Button, Combobox, DataTable, Header, Input, ProgressBar, Section, Spinner, Switch, Tabs } from '@xex/ui'
+import { Avatar, Badge, Button, Combobox, DataTable, Tooltip, Header, Input, ProgressBar, Section, Spinner, Switch, Tabs } from '@xex/ui'
 import { PEOPLE, USER_COLUMNS } from '../pages/demoData'
 
 // What the "Explore options" section knows about each control: the options it takes (name, kind,
@@ -171,6 +171,21 @@ export const CONTROLS: ExplorerControl[] = [
         </div>
       )
     },
+  },
+  {
+    id: 'Tooltip',
+    props: [
+      { name: 'content', kind: 'text', default: '', initial: 'Save your work' },
+      { name: 'placement', kind: 'select', options: ['pointer', 'top', 'bottom', 'left', 'right'], default: 'pointer' },
+      { name: 'delay', kind: 'number', default: 300, min: 0, max: 2000 },
+      { name: 'disabled', kind: 'boolean', default: false },
+    ],
+    previewClass: 'min-h-[14rem]',
+    render: (v) => (
+      <Tooltip content={s(v, 'content') || 'Tooltip'} placement={s(v, 'placement') as 'pointer'} delay={n(v, 'delay')} disabled={b(v, 'disabled')}>
+        <Button>Hover or focus me</Button>
+      </Tooltip>
+    ),
   },
   {
     id: 'Switch',

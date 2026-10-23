@@ -2,6 +2,7 @@ import { useEffect, useRef, type ComponentType, type ReactNode, type SVGProps } 
 import clsx from 'clsx'
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useDialogFocus } from '../components/keyboard'
+import { Tooltip } from '../components/Tooltip'
 
 export interface NavEntry {
   id: string
@@ -122,15 +123,16 @@ export function Sidebar({ items, active, onSelect, open, onClose, collapsed = fa
           <div className="min-w-0">{brand ?? <SidebarBrand />}</div>
           <div className="flex items-center gap-1">
             {onToggleCollapse && (
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                aria-label={collapsed ? 'Keep navigation open' : 'Collapse navigation'}
-                title={collapsed ? 'Keep navigation open' : 'Collapse navigation'}
-                className={clsx(iconButton, 'hidden opacity-40 transition-opacity hover:opacity-100 focus-visible:opacity-100 lg:inline-flex')}
-              >
-                {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
-              </button>
+              <Tooltip content={collapsed ? 'Keep navigation open' : 'Collapse navigation'} placement="pointer" className="hidden lg:inline-flex">
+                <button
+                  type="button"
+                  onClick={onToggleCollapse}
+                  aria-label={collapsed ? 'Keep navigation open' : 'Collapse navigation'}
+                  className={clsx(iconButton, 'opacity-40 transition-opacity hover:opacity-100 focus-visible:opacity-100')}
+                >
+                  {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
+                </button>
+              </Tooltip>
             )}
             <button type="button" onClick={onClose} aria-label="Close navigation" className={clsx(iconButton, docked && 'lg:hidden')}>
               <XMarkIcon className="h-5 w-5" />
