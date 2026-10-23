@@ -28,7 +28,7 @@ function other(p: PropDef, current: string | number | boolean): string | number 
 }
 
 // Behaviour-only options that leave no trace in the markup of a freshly rendered control.
-const BEHAVIOUR_ONLY = new Set(['Tabs.activation', 'Combobox.searchable', 'Combobox.picked', 'Combobox.items']) // only visible while the list is open, or demo state
+const BEHAVIOUR_ONLY = new Set(['Tabs.activation', 'Combobox.searchable', 'Combobox.picked', 'Combobox.items', 'Tooltip.delay']) // only visible while the list is open, or demo state
 
 describe('options explorer', () => {
   it('only lists controls the library exports and that have a code snippet', () => {
@@ -61,7 +61,8 @@ describe('options explorer', () => {
         const changed = { ...base, [attrOption.name]: other(attrOption, base[attrOption.name]) }
         expect(attributesFor(c, changed).join(' ')).toContain(attrOption.name)
         const code = codeText(c, changed)!
-        expect(code).toContain(`import { ${c.id} } from '@xex/ui'`)
+        // the example may import what it uses too (a Tooltip's example is a Button)
+        expect(code).toMatch(new RegExp(String.raw`import \{[^}]*\b${c.id}\b[^}]*\} from '@xex/ui'`))
         expect(code).toContain(`<${c.id}`)
       })
     })

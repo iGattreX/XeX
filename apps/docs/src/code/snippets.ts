@@ -84,6 +84,7 @@ export const SNIPPETS: Record<string, Snippet> = {
     el('Select', p ?? ['label="Role"', 'value={role}', 'onChange={(e) => setRole(e.target.value)}', "options={[{ value: 'admin', label: 'Admin' }, { value: 'member', label: 'Member' }]}"]),
   ScrollRail: () =>
     `<div className="relative">\n  <ul ref={listRef} className={\`max-h-64 overflow-y-auto pr-3 \${scrollbarHidden}\`}>…</ul>\n  <ScrollRail target={listRef} />\n</div>`,
+  Tooltip: (p) => block('Tooltip', p ?? ['content="Save your work"'], '<Button>Save</Button>'),
   Combobox: (p) =>
     el('Combobox', p ?? ['label="Country"', 'value={country}', 'onChange={setCountry}', "options={[{ value: 'fr', label: 'France' }, { value: 'de', label: 'Germany' }]}"]),
   MultiSelect: () => `<MultiSelect\n  label="Status"\n  options={[{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Closed' }]}\n  value={selected}\n  onChange={setSelected}\n/>`,
