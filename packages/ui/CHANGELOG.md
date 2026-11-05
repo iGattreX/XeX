@@ -1,5 +1,13 @@
 # @xex/ui
 
+## 0.9.1
+
+### Patch Changes
+
+- f9e249c: The `Combobox` trigger (so the theme dropdown, `MultiSelect`, `FontPicker` and the table filters) no longer shows a focus ring when it is pressed with the mouse; the ring still shows for keyboard focus, like the other buttons.
+- Updated dependencies [f9e249c]
+  - @xex/tokens@0.9.1
+
 ## 0.9.0
 
 ### Minor Changes
