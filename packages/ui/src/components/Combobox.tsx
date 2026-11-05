@@ -355,7 +355,8 @@ export function Combobox(props: ComboboxProps) {
         onKeyDown={onKeyDown}
         className={clsx(
           'flex w-full cursor-default items-center justify-between gap-2 rounded-lg border bg-surface px-3 py-2 text-left text-sm text-gray-900',
-          'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
+          // a ring for the keyboard only: pressing the trigger with the mouse is not a reason to outline it
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:border-brand-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
           error ? 'border-danger' : multiple && selectedValues.length ? 'border-brand-500' : 'border-gray-300',
           triggerClassName,
         )}

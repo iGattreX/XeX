@@ -159,3 +159,13 @@ describe('Combobox placeholder', () => {
     expect(screen.getByText('Alpha').className).not.toContain('text-gray-500')
   })
 })
+
+describe('Combobox focus ring', () => {
+  it('shows on keyboard focus only, as every other button does: the trigger uses focus-visible, not focus', () => {
+    render(<Combobox label="Letter" options={few} value="" onChange={() => {}} />)
+    const classes = screen.getByRole('combobox', { name: /Letter/ }).className
+    expect(classes).toContain('focus-visible:ring-2')
+    expect(classes).not.toMatch(/(^| )focus:ring/)
+    expect(classes).not.toMatch(/(^| )focus:border/)
+  })
+})
