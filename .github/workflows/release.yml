@@ -1,22 +1,68 @@
 name: Release
 
-# Publishes to npm when a version tag (vX.Y.Z) is pushed.
-# Uses npm trusted publishing (OIDC): there is no npm token anywhere in this repo.
-# The trusted publisher on npm allows direct publishing, so there is no manual approval step: the
-# tag is the release decision. (To require a 2FA approval again, turn "direct publish" off on npm
-# and replace `npm publish` below with `npm stage publish`.)
+# Publishes to npm by itself when a push to main carries package versions that are not on npm yet, which is
+# what merging the "Version packages" pull request does. There is no tag to push: this workflow creates the
+# vX.Y.Z tag and the GitHub release once the packages are published. A push to main with nothing new to
+# release finishes after a few seconds.
+#
+# Uses npm trusted publishing (OIDC): there is no npm token anywhere in this repo. The trusted publisher on
+# npm allows direct publishing, so there is no manual approval step. (To require a 2FA approval again, turn
+# "direct publish" off on npm and replace `npm publish` below with `npm stage publish`.)
 # Setup: on npmjs.com, for each package, Settings -> Trusted Publisher -> GitHub Actions:
 #   owner iGattreX, repository XeX, workflow filename release.yml (leave environment empty).
+#
+# The code was already checked by CI before it reached main, so this workflow builds and publishes; it does
+# not repeat the type-check, tests and audits. To retry a failed publish, run it by hand (Actions -> Release).
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+  workflow_dispatch:
+
+# One release at a time; a second one waits for the first rather than racing it.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
-  contents: write   # create the GitHub release
+  contents: write   # create the tag and the GitHub release
   id-token: write   # lets npm exchange this workflow's identity for a publish credential
 
 jobs:
+  # Is there anything to release? A few seconds: no install, only a look at the versions on npm.
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      needed: ${{ steps.versions.outputs.needed }}
+      version: ${{ steps.versions.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - id: versions
+        run: |
+          version=$(node -p "require('./packages/ui/package.json').version")
+          needed=false
+          for dir in tokens tailwind-preset ui; do
+            name=$(node -p "require('./packages/$dir/package.json').name")
+            v=$(node -p "require('./packages/$dir/package.json').version")
+            if [ "$v" != "$version" ]; then
+              echo "::error::packages/$dir is at $v but packages/ui is at $version: the packages are released together."
+              exit 1
+            fi
+            if ! npm view "$name@$v" version >/dev/null 2>&1; then needed=true; fi
+          done
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "needed=$needed" >> "$GITHUB_OUTPUT"
+          if [ "$needed" = "true" ]; then echo "v$version is not on npm yet: releasing it."; else echo "v$version is already on npm: nothing to release."; fi
+
   publish:
+    needs: check
+    if: needs.check.outputs.needed == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -34,28 +80,8 @@ jobs:
 
       - run: npm ci
 
-      - name: Check the tag matches every package version
-        run: |
-          tag="${GITHUB_REF_NAME#v}"
-          for dir in tokens tailwind-preset ui; do
-            version=$(node -p "require('./packages/$dir/package.json').version")
-            if [ "$version" != "$tag" ]; then
-              echo "::error::Tag v$tag does not match packages/$dir ($version). Run: node scripts/set-version.mjs $tag"
-              exit 1
-            fi
-          done
-
-      - name: Type-check
-        run: npm run typecheck
-
       - name: Build
-        run: npm run build
-
-      - name: Unit tests
-        run: npm run test -w @xex/ui
-
-      - name: Contrast audit
-        run: npm run audit:contrast
+        run: npm run build:packages
 
       # Order matters: ui depends on tokens. Versions already on npm are skipped, so a re-run is safe.
       - name: Publish packages to npm
@@ -70,8 +96,10 @@ jobs:
             fi
           done
 
-      - name: Create GitHub release
+      # Creates the vX.Y.Z tag on the released commit, with notes from the pull requests since the last release.
+      - name: Tag and create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          tag="v${{ needs.check.outputs.version }}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --generate-notes

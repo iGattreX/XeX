@@ -1,7 +1,8 @@
 name: Version packages
 
 # Keeps a "Version packages" pull request up to date from the pending changesets (.changeset/*.md).
-# Merge it, then tag the new version to release it (see the Release workflow).
+# Merging it is the release: the Release workflow then publishes the new version to npm and tags it.
+# Several pull requests can be merged before that, and go out together in one release.
 on:
   push:
     branches: [main]
