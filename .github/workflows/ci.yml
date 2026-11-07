@@ -14,7 +14,34 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  # Which parts of the repo changed? The browser tests are the slow part, so they only run when something
+  # that can change what a user sees (a package, the docs site, the build or these workflows) changed.
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      browser: ${{ steps.filter.outputs.browser }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "browser=true" >> "$GITHUB_OUTPUT"   # every push to main is checked in full
+            exit 0
+          fi
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(packages/|apps/|package(-lock)?\.json$|tsconfig|\.github/workflows/)'; then
+            echo "browser=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "browser=false" >> "$GITHUB_OUTPUT"
+            echo "Only docs/changesets changed: skipping the browser tests."
+          fi
+
+  # Type-check, build, unit tests, contrast audit, publishable contents.
+  checks:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -37,11 +64,48 @@ jobs:
       - name: Unit and component tests (includes structural accessibility checks)
         run: npm run test -w @xex/ui
 
-      # Real-browser axe checks (WCAG 2.x A/AA, incl. colour contrast) for every theme in light and dark.
+      - name: Contrast audit (WCAG AA for every theme)
+        run: npm run audit:contrast
+
+      # Lists exactly what each package would publish; fails if packing breaks.
+      - name: Check publishable contents
+        run: npm run pack:check
+
+  # Real-browser axe checks (WCAG 2.x A/AA, incl. colour contrast) for every theme in light and dark,
+  # plus the interaction tests. Runs beside `checks`, so the two take as long as the slower one.
+  browser:
+    needs: changes
+    if: needs.changes.outputs.browser == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build packages and docs site
+        run: npm run build
+
+      # The browser download is cached by Playwright's version; the system libraries are always installed.
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
       - name: Install browser
         run: npx playwright install --with-deps chromium
 
-      - name: End-to-end accessibility tests
+      - name: End-to-end tests
         run: npm run test:e2e -w @xex/docs
 
       - name: Upload test report on failure
@@ -52,9 +116,18 @@ jobs:
           path: apps/docs/test-results
           if-no-files-found: ignore
 
-      - name: Contrast audit (WCAG AA for every theme)
-        run: npm run audit:contrast
-
-      # Lists exactly what each package would publish; fails if packing breaks.
-      - name: Check publishable contents
-        run: npm run pack:check
+  # The one required status check (branch protection waits for "verify"). It is green when the parallel
+  # jobs above passed, or when the browser tests were deliberately skipped.
+  verify:
+    needs: [changes, checks, browser]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: All checks passed
+        run: |
+          echo "checks:  ${{ needs.checks.result }}"
+          echo "browser: ${{ needs.browser.result }}"
+          [ "${{ needs.changes.result }}" = "success" ] || exit 1
+          [ "${{ needs.checks.result }}" = "success" ] || exit 1
+          case "${{ needs.browser.result }}" in success|skipped) ;; *) exit 1 ;; esac
